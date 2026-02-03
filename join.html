@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Join Us - Victory CC</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="nav-bar">
+        <div class="container nav-inner">
+          <a class="logo" href="index.html">
+            <img src="assets/img/cropped-file-821d4fd4.png" alt="Victory CC logo" />
+            <div class="logo-text">
+              <span class="club-name">Victory CC</span>
+              <span class="club-tag">Cricket Club</span>
+            </div>
+          </a>
+
+          <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">
+            <span class="sr-only">Toggle navigation</span>
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+
+          <nav id="site-nav" class="site-nav">
+            <a href="index.html#teams">Teams</a>
+            <a href="about.html">About Us</a>
+            <a href="https://vcc-booking-app.vercel.app/login" target="_blank" rel="noopener">Book Facility</a>
+            <a href="contact.html">Contact Us</a>
+            <a href="join.html">Join Us</a>
+          </nav>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="join">
+        <div class="container">
+          <div class="join-header">
+            <h2>Join Us</h2>
+            <p>Please complete the form below to register your interest in joining Victory CC.</p>
+          </div>
+
+          <form class="join-form" action="#" method="post">
+            <div class="form-row">
+              <div class="form-field">
+                <label for="join-first-name">First</label>
+                <input id="join-first-name" name="first_name" type="text" required />
+              </div>
+              <div class="form-field">
+                <label for="join-last-name">Last</label>
+                <input id="join-last-name" name="last_name" type="text" required />
+              </div>
+            </div>
+
+            <div class="form-field">
+              <label for="join-gender">Gender</label>
+              <select id="join-gender" name="gender" required>
+                <option value="" selected disabled></option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Prefer Not To Say">Prefer Not To Say</option>
+              </select>
+            </div>
+
+            <div class="form-row">
+              <div class="form-field">
+                <label for="join-email">Email</label>
+                <input id="join-email" name="email" type="email" required />
+              </div>
+              <div class="form-field">
+                <label for="join-email-confirm">Confirm Email</label>
+                <input id="join-email-confirm" name="email_confirm" type="email" required />
+              </div>
+            </div>
+
+            <div class="form-field">
+              <label for="join-phone">Phone Number</label>
+              <input id="join-phone" name="phone" type="tel" placeholder="07777766666" required />
+            </div>
+
+            <div class="form-field">
+              <label for="join-dob">DOB</label>
+              <input id="join-dob" name="dob" type="text" placeholder="dd/mm/yyyy" required />
+            </div>
+
+            <div class="form-field">
+              <label for="join-address1">Address Line 1</label>
+              <input id="join-address1" name="address_line_1" type="text" placeholder="2 Friar Lane, Derby" required />
+            </div>
+
+            <div class="form-field">
+              <label for="join-address2">Address Line 2</label>
+              <input id="join-address2" name="address_line_2" type="text" />
+            </div>
+
+            <div class="form-field">
+              <label for="join-postcode">Post Code</label>
+              <input id="join-postcode" name="postcode" type="text" placeholder="DE1 2BB" required />
+            </div>
+
+            <div class="form-field">
+              <label for="join-passport">Passport Type</label>
+              <select id="join-passport" name="passport_type" required>
+                <option value="" selected disabled></option>
+                <option value="British">British</option>
+                <option value="EU/EEA">EU/EEA</option>
+                <option value="Internaltional">Internaltional</option>
+              </select>
+            </div>
+
+            <div class="form-field">
+              <label for="join-visa">Visa Number (If Applicable)</label>
+              <input id="join-visa" name="visa_number" type="text" />
+            </div>
+
+            <div class="form-field">
+              <label for="join-entry-date">Date of Entry to UK</label>
+              <input id="join-entry-date" name="entry_date" type="text" placeholder="dd/mm/yyyy" />
+            </div>
+
+            <div class="form-field form-hidden">
+              <label for="join-honeypot">2 Post Phone</label>
+              <input id="join-honeypot" name="two_post_phone" type="text" autocomplete="off" tabindex="-1" />
+            </div>
+
+            <div class="form-field">
+              <label for="join-previous-clubs">Previous Club(s)</label>
+              <textarea id="join-previous-clubs" name="previous_clubs" rows="3"></textarea>
+            </div>
+
+            <div class="form-field">
+              <label for="join-medical">Medical Conditions</label>
+              <textarea id="join-medical" name="medical_conditions" rows="3" required></textarea>
+            </div>
+
+            <div class="form-field">
+              <label for="join-allergies">Allergies</label>
+              <textarea id="join-allergies" name="allergies" rows="3" required></textarea>
+            </div>
+
+            <div class="form-field">
+              <label class="checkbox-label">
+                <input type="checkbox" name="confirmation" required />
+                I hereby confirm that all of the statements below are true.
+              </label>
+              <div class="form-description">
+                <p>1 The personal information I have given is correct</p>
+                <p>2 I am a citizen of the European Community as defined in the current Derbyshire County Cricket League rules. (Not applicable to overseas (Category 3) players)</p>
+                <p>3 I have no outstanding financial or other obligations to nor am I under any current or pending disciplinary action from any club or body affiliated to the England and Wales Cricket Board</p>
+                <p>4 I am not subject to any restrictions imposed by the ECB relating to their Child Welfare policy</p>
+                <p>5 I have read and agree to abide at all times by the Rules and Code of Conduct of the Derbyshire County Cricket League and the ECB Code of Conduct and accept that proven breaches of these will lead to disciplinary action</p>
+                <p>6 I accept that disciplinary actions taken by the Derbyshire County Cricket League may apply to all cricket played under the auspices of the ECB</p>
+                <p>7 I understand that the information given on this form will be held electronically and may be disclosed to other appropriate cricket authorities as necessary</p>
+                <p><strong>For Overseas players (category 3) only:</strong></p>
+                <p>1 I confirm that I have submitted my police clearance, a completed overseas clearance form and a copy of my passport (together with a photograph) to ECB</p>
+                <p>2 I have completed a Good Practice Child Protection Course OR I am prepared to attend a 3 hour Good Practice Child protection Workshop arranged by DCB before the end of May</p>
+                <p>NB It is the responsibility of the club to ensure that any player registered under Category 3 has entered into and remains in this country legally and that they and the player comply at all times with the conditions of the visa under which they have done so</p>
+                <p><strong>The club, in submitting this registration, should note:</strong></p>
+                <p>1 It is an offence for a player to register for more than one club concurrently in the Derbyshire County Cricket League, other than those in the Under 16 age group and below and those over the age of 50</p>
+                <p>2 It is an offence for a player to play in the Derbyshire County Cricket League while also playing Saturday League cricket in another League.</p>
+              </div>
+            </div>
+
+            <button class="btn" type="submit">Submit</button>
+            <p class="form-note">This is a static form. Let me know if you want it wired to email or a backend.</p>
+          </form>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-grid">
+        <div>
+          <h3>About Us</h3>
+          <p>Follow the club and stay updated with our latest fixtures and news.</p>
+          <div class="footer-social">
+            <a href="https://www.facebook.com/vccderby/" aria-label="Facebook" target="_blank" rel="noopener">
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M12 2C6.5 2 2 6.5 2 12c0 5 3.7 9.1 8.4 9.9v-7H7.9V12h2.5V9.8c0-2.5 1.5-3.9 3.8-3.9 1.1 0 2.2.2 2.2.2v2.5h-1.3c-1.2 0-1.6.8-1.6 1.6V12h2.8l-.4 2.9h-2.3v7C18.3 21.1 22 17 22 12c0-5.5-4.5-10-10-10z"></path>
+              </svg>
+            </a>
+            <a href="https://www.instagram.com/vccderby/" aria-label="Instagram" target="_blank" rel="noopener">
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M12,4.622c2.403,0,2.688,0.009,3.637,0.052c0.877,0.04,1.354,0.187,1.671,0.31c0.42,0.163,0.72,0.358,1.035,0.673 c0.315,0.315,0.51,0.615,0.673,1.035c0.123,0.317,0.27,0.794,0.31,1.671c0.043,0.949,0.052,1.234,0.052,3.637 s-0.009,2.688-0.052,3.637c-0.04,0.877-0.187,1.354-0.31,1.671c-0.163,0.42-0.358,0.72-0.673,1.035 c-0.315,0.315-0.615,0.51-1.035,0.673c-0.317,0.123-0.794,0.27-1.671,0.31c-0.949,0.043-1.233,0.052-3.637,0.052 s-2.688-0.009-3.637-0.052c-0.877-0.04-1.354-0.187-1.671-0.31c-0.42-0.163-0.72-0.358-1.035-0.673 c-0.315-0.315-0.51-0.615-0.673-1.035c-0.123-0.317-0.27-0.794-0.31-1.671C4.631,14.688,4.622,14.403,4.622,12 s0.009-2.688,0.052-3.637c0.04-0.877,0.187-1.354,0.31-1.671c0.163-0.42,0.358-0.72,0.673-1.035 c0.315-0.315,0.615-0.51,1.035-0.673c0.317-0.123,0.794-0.27,1.671-0.31C9.312,4.631,9.597,4.622,12,4.622 M12,3 C9.556,3,9.249,3.01,8.289,3.054C7.331,3.098,6.677,3.25,6.105,3.472C5.513,3.702,5.011,4.01,4.511,4.511 c-0.5,0.5-0.808,1.002-1.038,1.594C3.25,6.677,3.098,7.331,3.054,8.289C3.01,9.249,3,9.556,3,12c0,2.444,0.01,2.751,0.054,3.711 c0.044,0.958,0.196,1.612,0.418,2.185c0.23,0.592,0.538,1.094,1.038,1.594c0.5,0.5,1.002,0.808,1.594,1.038 c0.572,0.222,1.227,0.375,2.185,0.418C9.249,20.99,9.556,21,12,21s2.751-0.01,3.711-0.054c0.958-0.044,1.612-0.196,2.185-0.418 c0.592-0.23,1.094-0.538,1.594-1.038c0.5-0.5,0.808-1.002,1.038-1.594c0.222-0.572,0.375-1.227,0.418-2.185 C20.99,14.751,21,14.444,21,12s-0.01-2.751-0.054-3.711c-0.044-0.958-0.196-1.612-0.418-2.185c-0.23-0.592-0.538-1.094-1.038-1.594 c-0.5-0.5,0.808-1.002,1.594-1.038c0.572-0.222,1.227-0.375,2.185-0.418C14.751,3.01,14.444,3,12,3L12,3z M12,7.378 c-2.552,0-4.622,2.069-4.622,4.622S9.448,16.622,12,16.622s4.622-2.069,4.622-4.622S14.552,7.378,12,7.378z M12,15 c-1.657,0-3-1.343-3-3s1.343-3,3-3s3,1.343,3,3S13.657,15,12,15z M16.804,6.116c-0.596,0-1.08,0.484-1.08,1.08 s0.484,1.08,1.08,1.08c0.596,0,1.08-0.484,1.08-1.08S17.401,6.116,16.804,6.116z"></path>
+              </svg>
+            </a>
+          </div>
+        </div>
+        <div>
+          <h3>Helps</h3>
+          <ul class="footer-links">
+            <li><a href="#">Help</a></li>
+            <li><a href="#">FAQs</a></li>
+            <li><a href="#">Condition</a></li>
+            <li><a href="#">Privacy Policy</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3>Contact Us</h3>
+          <p>manager@vccderby.co.uk</p>
+          <p>Victory Cricket Club, Moor Ln, Derby, DE24 9HY</p>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <div class="container">
+          <p>© Victory CC. All rights reserved.</p>
+        </div>
+      </div>
+    </footer>
+
+    <script src="main.js"></script>
+  </body>
+</html>
