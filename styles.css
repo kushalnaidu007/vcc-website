@@ -84,7 +84,14 @@ a.link {
 .container {
   width: min(100%, var(--max-width));
   margin: 0 auto;
-  padding: 0 20px;
+  padding: 0 12px;
+}
+
+.nav-bar .container {
+  padding-left: 16px;
+  padding-right: 0;
+  max-width: none;
+  width: 100%;
 }
 
 .sr-only {
@@ -107,14 +114,21 @@ a.link {
   z-index: 10;
 }
 
+.site-header::after {
+  content: "";
+  display: block;
+  height: 0;
+}
+
 .nav-bar {
-  border-top: 1px solid var(--border);
+  border-top: none;
 }
 
 .nav-inner {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  align-items: flex-start;
+  justify-content: flex-start;
+  flex-direction: column;
   gap: 20px;
   padding: 18px 0;
 }
@@ -156,12 +170,17 @@ a.link {
 .site-nav {
   display: flex;
   align-items: center;
+  justify-content: flex-start;
   gap: 20px;
   font-family: "Abel", sans-serif;
   font-size: 14px;
   text-transform: uppercase;
   letter-spacing: 0.6px;
   color: var(--text);
+  width: 100%;
+  padding: 10px 0;
+  border-top: 6px solid var(--accent);
+  border-bottom: 6px solid var(--accent);
 }
 
 .site-nav a {
@@ -859,6 +878,7 @@ a.link {
 @media (max-width: 900px) {
   .nav-toggle {
     display: block;
+    margin-left: auto;
   }
 
   .site-nav {
@@ -881,6 +901,9 @@ a.link {
 
   .nav-inner {
     position: relative;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
   }
 
   .hero-content {
