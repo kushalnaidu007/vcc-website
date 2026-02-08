@@ -54,3 +54,44 @@ document.querySelectorAll('[data-gallery-slider]').forEach((slider) => {
     }, 1800);
   });
 });
+
+const playersList = document.getElementById('players-list');
+const playerSearch = document.getElementById('player-search');
+const playerCount = document.getElementById('player-count');
+
+if (playersList && playerSearch && playerCount) {
+  const renderPlayers = (players) => {
+    playersList.innerHTML = '';
+    const fragment = document.createDocumentFragment();
+    players.forEach((player) => {
+      const card = document.createElement('div');
+      card.className = 'player-card';
+      card.textContent = player.name;
+      fragment.appendChild(card);
+    });
+    playersList.appendChild(fragment);
+    playerCount.textContent = `${players.length} players`;
+  };
+
+  fetch('assets/data/players.json')
+    .then((res) => res.json())
+    .then((data) => {
+      const players = (data.players || [])
+        .filter((p) => p && p.name)
+        .map((p) => ({ name: p.name.trim() }))
+        .sort((a, b) => a.name.localeCompare(b.name));
+
+      renderPlayers(players);
+
+      playerSearch.addEventListener('input', (event) => {
+        const term = event.target.value.trim().toLowerCase();
+        const filtered = term
+          ? players.filter((p) => p.name.toLowerCase().includes(term))
+          : players;
+        renderPlayers(filtered);
+      });
+    })
+    .catch(() => {
+      playerCount.textContent = 'Unable to load players right now.';
+    });
+}
