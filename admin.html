@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Admin - Victory CC</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="nav-bar">
+        <div class="container nav-inner">
+          <a class="logo" href="index.html">
+            <img src="assets/img/cropped-file-821d4fd4.png" alt="Victory CC logo" />
+            <div class="logo-text">
+              <span class="club-name">Victory CC</span>
+              <span class="club-tag">Cricket Club</span>
+            </div>
+          </a>
+
+          <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">
+            <span class="sr-only">Toggle navigation</span>
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+
+          <nav id="site-nav" class="site-nav">
+            <a href="index.html#home">Home</a>
+            <a href="index.html#teams">Teams</a>
+            <a href="players.html">Players</a>
+            <a href="policies.html">Policies</a>
+            <a href="about.html">About Us</a>
+            <a href="https://vcc-booking-app.vercel.app/login" target="_blank" rel="noopener">Book Facility</a>
+            <a href="contact.html">Contact Us</a>
+            <a href="sponsor.html">Be a Sponsor</a>
+            <a href="join.html">Join Us</a>
+          </nav>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="admin-page">
+        <div class="container">
+          <div class="admin-header">
+            <h1>Admin</h1>
+            <p>Publish news and match summaries. Use your admin token to submit updates.</p>
+          </div>
+
+          <div class="admin-card">
+            <label for="admin-token">Admin Token</label>
+            <input id="admin-token" type="password" placeholder="Enter admin token" />
+            <p class="admin-hint">Keep this token private. It is required to publish updates.</p>
+          </div>
+
+          <div class="admin-grid">
+            <section class="admin-panel">
+              <h2>News / Announcements</h2>
+              <form id="news-form" class="admin-form">
+                <div class="form-field">
+                  <label for="news-title">Title</label>
+                  <input id="news-title" type="text" required />
+                </div>
+                <div class="form-field">
+                  <label for="news-body">Summary</label>
+                  <textarea id="news-body" rows="4" required></textarea>
+                </div>
+                <div class="form-row">
+                  <div class="form-field">
+                    <label for="news-date">Date</label>
+                    <input id="news-date" type="date" required />
+                  </div>
+                  <div class="form-field">
+                    <label for="news-link">Optional Link</label>
+                    <input id="news-link" type="url" placeholder="https://" />
+                  </div>
+                </div>
+                <button class="btn" type="submit">Publish News</button>
+                <p class="admin-status" id="news-status"></p>
+              </form>
+            </section>
+
+            <section class="admin-panel">
+              <h2>Match Summaries</h2>
+              <form id="match-form" class="admin-form">
+                <div class="form-field">
+                  <label for="match-title">Match Title</label>
+                  <input id="match-title" type="text" required placeholder="VCC vs ..." />
+                </div>
+                <div class="form-row">
+                  <div class="form-field">
+                    <label for="match-date">Match Date</label>
+                    <input id="match-date" type="date" required />
+                  </div>
+                  <div class="form-field">
+                    <label for="match-result">Result</label>
+                    <input id="match-result" type="text" placeholder="VCC won by 5 wickets" required />
+                  </div>
+                </div>
+                <div class="form-field">
+                  <label for="match-body">Summary</label>
+                  <textarea id="match-body" rows="4" required></textarea>
+                </div>
+                <div class="form-field">
+                  <label for="match-link">Optional Scorecard Link</label>
+                  <input id="match-link" type="url" placeholder="https://" />
+                </div>
+                <button class="btn" type="submit">Publish Summary</button>
+                <p class="admin-status" id="match-status"></p>
+              </form>
+            </section>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-grid">
+        <div>
+          <h3>About Us</h3>
+          <p>Follow the club and stay updated with our latest fixtures and news.</p>
+          <div class="footer-social">
+            <a aria-label="Facebook" href="https://www.facebook.com/vccderby/" rel="noopener" target="_blank">
+              <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24">
+                <path d="M12 2C6.5 2 2 6.5 2 12c0 5 3.7 9.1 8.4 9.9v-7H7.9V12h2.5V9.8c0-2.5 1.5-3.9 3.8-3.9 1.1 0 2.2.2 2.2.2v2.5h-1.3c-1.2 0-1.6.8-1.6 1.6V12h2.8l-.4 2.9h-2.3v7C18.3 21.1 22 17 22 12c0-5.5-4.5-10-10-10z"></path>
+              </svg>
+            </a>
+            <a aria-label="Instagram" href="https://www.instagram.com/vccderby/" rel="noopener" target="_blank">
+              <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24">
+                <path d="M12,4.622c2.403,0,2.688,0.009,3.637,0.052c0.877,0.04,1.354,0.187,1.671,0.31c0.42,0.163,0.72,0.358,1.035,0.673 c0.315,0.315,0.51,0.615,0.673,1.035c0.123,0.317,0.27,0.794,0.31,1.671c0.043,0.949,0.052,1.234,0.052,3.637 s-0.009,2.688-0.052,3.637c-0.04,0.877-0.187,1.354-0.31,1.671c-0.163,0.42-0.358,0.72-0.673,1.035 c-0.315,0.315-0.615,0.51-1.035,0.673c-0.317,0.123-0.794,0.27-1.671,0.31c-0.949,0.043-1.233,0.052-3.637,0.052 s-2.688-0.009-3.637-0.052c-0.877-0.04-1.354-0.187-1.671-0.31c-0.42-0.163-0.72-0.358-1.035-0.673 c-0.315-0.315-0.51-0.615-0.673-1.035c-0.123-0.317-0.27-0.794-0.31-1.671C4.631,14.688,4.622,14.403,4.622,12 s0.009-2.688,0.052-3.637c0.04-0.877,0.187-1.354,0.31-1.671c0.163-0.42,0.358-0.72,0.673-1.035 c0.315-0.315,0.615-0.51,1.035-0.673c0.317-0.123,0.794-0.27,1.671-0.31C9.312,4.631,9.597,4.622,12,4.622 M12,3 C9.556,3,9.249,3.01,8.289,3.054C7.331,3.098,6.677,3.25,6.105,3.472C5.513,3.702,5.011,4.01,4.511,4.511 c-0.5,0.5-0.808,1.002-1.038,1.594C3.25,6.677,3.098,7.331,3.054,8.289C3.01,9.249,3,9.556,3,12c0,2.444,0.01,2.751,0.054,3.711 c0.044,0.958,0.196,1.612,0.418,2.185c0.23,0.592,0.538,1.094,1.038,1.594c0.5,0.5,1.002,0.808,1.594,1.038 c0.572,0.222,1.227,0.375,2.185,0.418C9.249,20.99,9.556,21,12,21s2.751-0.01,3.711-0.054c0.958-0.044,1.612-0.196,2.185-0.418 c0.592-0.23,1.094-0.538,1.594-1.038c0.5-0.5,0.808-1.002,1.038-1.594c0.222-0.572,0.375-1.227,0.418-2.185 C20.99,14.751,21,14.444,21,12s-0.01-2.751-0.054-3.711c-0.044-0.958-0.196-1.612-0.418-2.185c-0.23-0.592-0.538-1.094-1.038-1.594 c-0.5-0.5-0.808-1.002-1.594-1.038c-0.572-0.222-1.227-0.375-2.185-0.418C14.751,3.01,14.444,3,12,3L12,3z M12,7.378 c-2.552,0-4.622,2.069-4.622,4.622S9.448,16.622,12,16.622s4.622-2.069,4.622-4.622S14.552,7.378,12,7.378z M12,15 c-1.657,0-3-1.343-3-3s1.343-3,3-3s3,1.343,3,3S13.657,15,12,15z M16.804,6.116c-0.596,0-1.08,0.484-1.08,1.08 s0.484,1.08,1.08,1.08c0.596,0,1.08-0.484,1.08-1.08S17.401,6.116,16.804,6.116z"></path>
+              </svg>
+            </a>
+          </div>
+        </div>
+        <div>
+          <h3>Helps</h3>
+          <ul class="footer-links">
+            <li><a href="#">Help</a></li>
+            <li><a href="#">FAQs</a></li>
+            <li><a href="#">Condition</a></li>
+            <li><a href="#">Privacy Policy</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3>Contact Us</h3>
+          <p>manager@vccderby.co.uk</p>
+          <p>Victory Cricket Club, Moor Ln, Derby, DE24 9HY</p>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <div class="container">
+          <p>© Victory CC. All rights reserved.</p>
+        </div>
+      </div>
+    </footer>
+
+    <script src="main.js"></script>
+  </body>
+</html>

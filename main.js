@@ -93,5 +93,104 @@ if (playersList && playerSearch && playerCount) {
     })
     .catch(() => {
       playerCount.textContent = 'Unable to load players right now.';
+  });
+}
+
+const newsList = document.getElementById('news-list');
+const matchesList = document.getElementById('matches-list');
+
+const renderNews = (items) => {
+  if (!newsList) return;
+  newsList.innerHTML = '';
+  if (!items.length) {
+    newsList.innerHTML = '<p class=\"card-meta\">No news yet.</p>';
+    return;
+  }
+  const fragment = document.createDocumentFragment();
+  items.forEach((item) => {
+    const card = document.createElement('article');
+    card.className = 'news-card';
+    card.innerHTML = `\n      <span class=\"card-meta\">${item.date}</span>\n      <h3>${item.title}</h3>\n      <p>${item.summary}</p>\n      ${item.link ? `<a class=\"btn btn-outline\" href=\"${item.link}\" target=\"_blank\" rel=\"noopener\">Read more</a>` : ''}\n    `;\n    fragment.appendChild(card);
+  });
+  newsList.appendChild(fragment);
+};
+
+const renderMatches = (items) => {
+  if (!matchesList) return;
+  matchesList.innerHTML = '';
+  if (!items.length) {
+    matchesList.innerHTML = '<p class=\"card-meta\">No match summaries yet.</p>';
+    return;
+  }
+  const fragment = document.createDocumentFragment();
+  items.forEach((item) => {
+    const card = document.createElement('article');
+    card.className = 'match-card';
+    card.innerHTML = `\n      <span class=\"card-meta\">${item.date}</span>\n      <h3>${item.title}</h3>\n      <p><strong>${item.result}</strong></p>\n      <p>${item.summary}</p>\n      ${item.link ? `<a class=\"btn btn-outline\" href=\"${item.link}\" target=\"_blank\" rel=\"noopener\">View scorecard</a>` : ''}\n    `;\n    fragment.appendChild(card);
+  });
+  matchesList.appendChild(fragment);
+};
+
+if (newsList) {
+  fetch('/api/news')\n    .then((res) => res.json())\n    .then((data) => renderNews(Array.isArray(data) ? data : []))\n    .catch(() => renderNews([]));
+}
+
+if (matchesList) {
+  fetch('/api/matches')\n    .then((res) => res.json())\n    .then((data) => renderMatches(Array.isArray(data) ? data : []))\n    .catch(() => renderMatches([]));
+}
+
+const newsForm = document.getElementById('news-form');
+const matchForm = document.getElementById('match-form');
+const adminToken = document.getElementById('admin-token');
+const newsStatus = document.getElementById('news-status');
+const matchStatus = document.getElementById('match-status');
+
+const postItem = async (endpoint, payload, statusEl) => {
+  statusEl.textContent = 'Publishing...';
+  try {
+    const res = await fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Admin-Token': adminToken.value.trim(),
+      },
+      body: JSON.stringify(payload),
     });
+    if (!res.ok) {
+      const msg = await res.text();
+      throw new Error(msg || 'Request failed');
+    }
+    statusEl.textContent = 'Published successfully.';
+    statusEl.style.color = 'green';
+  } catch (err) {
+    statusEl.textContent = 'Failed to publish. Check token and try again.';
+    statusEl.style.color = 'crimson';
+  }
+};
+
+if (newsForm && adminToken && newsStatus) {
+  newsForm.addEventListener('submit', (event) => {
+    event.preventDefault();
+    postItem('/api/news', {
+      title: document.getElementById('news-title').value,
+      summary: document.getElementById('news-body').value,
+      date: document.getElementById('news-date').value,
+      link: document.getElementById('news-link').value,
+    }, newsStatus);
+    newsForm.reset();
+  });
+}
+
+if (matchForm && adminToken && matchStatus) {
+  matchForm.addEventListener('submit', (event) => {
+    event.preventDefault();
+    postItem('/api/matches', {
+      title: document.getElementById('match-title').value,
+      summary: document.getElementById('match-body').value,
+      date: document.getElementById('match-date').value,
+      result: document.getElementById('match-result').value,
+      link: document.getElementById('match-link').value,
+    }, matchStatus);
+    matchForm.reset();
+  });
 }
