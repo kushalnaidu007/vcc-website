@@ -132,11 +132,17 @@ const renderMatches = (items) => {
 };
 
 if (newsList) {
-  fetch('/api/news')\n    .then((res) => res.json())\n    .then((data) => renderNews(Array.isArray(data) ? data : []))\n    .catch(() => renderNews([]));
+  fetch('/api/news')
+    .then((res) => res.json())
+    .then((data) => renderNews(Array.isArray(data) ? data : []))
+    .catch(() => renderNews([]));
 }
 
 if (matchesList) {
-  fetch('/api/matches')\n    .then((res) => res.json())\n    .then((data) => renderMatches(Array.isArray(data) ? data : []))\n    .catch(() => renderMatches([]));
+  fetch('/api/matches')
+    .then((res) => res.json())
+    .then((data) => renderMatches(Array.isArray(data) ? data : []))
+    .catch(() => renderMatches([]));
 }
 
 const newsForm = document.getElementById('news-form');
