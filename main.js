@@ -103,14 +103,22 @@ const renderNews = (items) => {
   if (!newsList) return;
   newsList.innerHTML = '';
   if (!items.length) {
-    newsList.innerHTML = '<p class=\"card-meta\">No news yet.</p>';
+    newsList.innerHTML = '<p class="card-meta">No news yet.</p>';
     return;
   }
   const fragment = document.createDocumentFragment();
   items.forEach((item) => {
     const card = document.createElement('article');
     card.className = 'news-card';
-    card.innerHTML = `\n      <span class=\"card-meta\">${item.date}</span>\n      <h3>${item.title}</h3>\n      <p>${item.summary}</p>\n      ${item.link ? `<a class=\"btn btn-outline\" href=\"${item.link}\" target=\"_blank\" rel=\"noopener\">Read more</a>` : ''}\n    `;\n    fragment.appendChild(card);
+    const link = item.link
+      ? `<a class="btn btn-outline" href="${item.link}" target="_blank" rel="noopener">Read more</a>`
+      : '';
+    card.innerHTML =
+      `<span class="card-meta">${item.date}</span>` +
+      `<h3>${item.title}</h3>` +
+      `<p>${item.summary}</p>` +
+      link;
+    fragment.appendChild(card);
   });
   newsList.appendChild(fragment);
 };
@@ -119,17 +127,27 @@ const renderMatches = (items) => {
   if (!matchesList) return;
   matchesList.innerHTML = '';
   if (!items.length) {
-    matchesList.innerHTML = '<p class=\"card-meta\">No match summaries yet.</p>';
+    matchesList.innerHTML = '<p class="card-meta">No match summaries yet.</p>';
     return;
   }
   const fragment = document.createDocumentFragment();
   items.forEach((item) => {
     const card = document.createElement('article');
     card.className = 'match-card';
-    card.innerHTML = `\n      <span class=\"card-meta\">${item.date}</span>\n      <h3>${item.title}</h3>\n      <p><strong>${item.result}</strong></p>\n      <p>${item.summary}</p>\n      ${item.link ? `<a class=\"btn btn-outline\" href=\"${item.link}\" target=\"_blank\" rel=\"noopener\">View scorecard</a>` : ''}\n    `;\n    fragment.appendChild(card);
+    const link = item.link
+      ? `<a class="btn btn-outline" href="${item.link}" target="_blank" rel="noopener">View scorecard</a>`
+      : '';
+    card.innerHTML =
+      `<span class="card-meta">${item.date}</span>` +
+      `<h3>${item.title}</h3>` +
+      `<p><strong>${item.result}</strong></p>` +
+      `<p>${item.summary}</p>` +
+      link;
+    fragment.appendChild(card);
   });
   matchesList.appendChild(fragment);
 };
+
 
 if (newsList) {
   fetch('/api/news')
