@@ -1,12 +1,22 @@
-import { put, list } from '@vercel/blob';
+const { put, list } = require('@vercel/blob');
+const { randomUUID } = require('crypto');
 
 const BLOB_NAME = 'matches.json';
 
 const withCors = (res) => {
-  res.headers.set('Access-Control-Allow-Origin', '*');
-  res.headers.set('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
-  res.headers.set('Access-Control-Allow-Headers', 'Content-Type,X-Admin-Token');
-  return res;
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type,X-Admin-Token');
+};
+
+const readBody = async (req) => {
+  if (req.body) return req.body;
+  const chunks = [];
+  for await (const chunk of req) {
+    chunks.push(chunk);
+  }
+  const raw = Buffer.concat(chunks).toString('utf-8');
+  return raw ? JSON.parse(raw) : {};
 };
 
 const readCurrent = async () => {
@@ -18,36 +28,47 @@ const readCurrent = async () => {
   return Array.isArray(data) ? data : [];
 };
 
-export default async function handler(request) {
-  if (request.method === 'OPTIONS') {
-    return withCors(new Response(null, { status: 204 }));
+module.exports = async (req, res) => {
+  withCors(res);
+
+  if (req.method === 'OPTIONS') {
+    res.statusCode = 204;
+    res.end();
+    return;
   }
 
-  if (request.method === 'GET') {
+  if (req.method === 'GET') {
     const data = await readCurrent();
-    return withCors(new Response(JSON.stringify(data), {
-      headers: { 'Content-Type': 'application/json' },
-    }));
+    res.setHeader('Content-Type', 'application/json');
+    res.statusCode = 200;
+    res.end(JSON.stringify(data));
+    return;
   }
 
-  if (request.method !== 'POST') {
-    return withCors(new Response('Method Not Allowed', { status: 405 }));
+  if (req.method !== 'POST') {
+    res.statusCode = 405;
+    res.end('Method Not Allowed');
+    return;
   }
 
-  const token = request.headers.get('x-admin-token');
+  const token = req.headers['x-admin-token'];
   if (!token || token !== process.env.VCC_ADMIN_TOKEN) {
-    return withCors(new Response('Unauthorized', { status: 401 }));
+    res.statusCode = 401;
+    res.end('Unauthorized');
+    return;
   }
 
-  const body = await request.json();
+  const body = await readBody(req);
   const { title, summary, date, result, link } = body || {};
   if (!title || !summary || !date || !result) {
-    return withCors(new Response('Missing fields', { status: 400 }));
+    res.statusCode = 400;
+    res.end('Missing fields');
+    return;
   }
 
   const current = await readCurrent();
   const entry = {
-    id: crypto.randomUUID(),
+    id: randomUUID(),
     title: String(title),
     summary: String(summary),
     date: String(date),
@@ -63,7 +84,7 @@ export default async function handler(request) {
     addRandomSuffix: false,
   });
 
-  return withCors(new Response(JSON.stringify(entry), {
-    headers: { 'Content-Type': 'application/json' },
-  }));
-}
+  res.setHeader('Content-Type', 'application/json');
+  res.statusCode = 200;
+  res.end(JSON.stringify(entry));
+};
