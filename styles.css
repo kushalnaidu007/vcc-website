@@ -1140,7 +1140,8 @@ a.link {
 .matches-grid {
   display: grid;
   gap: 20px;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(260px, 1fr);
 }
 
 .news-card,
@@ -1171,6 +1172,99 @@ a.link {
   font-family: "Abel", sans-serif;
   font-size: 14px;
   color: rgba(17, 17, 17, 0.6);
+}
+
+.carousel {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 12px;
+}
+
+.carousel-track {
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  padding-bottom: 6px;
+}
+
+.carousel-track::-webkit-scrollbar {
+  height: 6px;
+}
+
+.carousel-track::-webkit-scrollbar-thumb {
+  background: rgba(32, 64, 128, 0.3);
+  border-radius: 999px;
+}
+
+.carousel-track > * {
+  scroll-snap-align: start;
+}
+
+.carousel-nav {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--secondary);
+  color: var(--accent);
+  font-size: 20px;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.carousel-nav:hover {
+  box-shadow: var(--shadow-soft);
+}
+
+.modal {
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.modal.is-open {
+  display: grid;
+}
+
+.modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content {
+  position: relative;
+  background: var(--secondary);
+  color: var(--text);
+  border-radius: 16px;
+  padding: 24px;
+  max-width: 560px;
+  width: min(90vw, 560px);
+  box-shadow: var(--shadow-soft);
+  display: grid;
+  gap: 12px;
+  z-index: 1;
+}
+
+.modal-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  border: none;
+  background: transparent;
+  font-size: 22px;
+  cursor: pointer;
+}
+
+.modal-meta {
+  font-family: "Abel", sans-serif;
+  color: rgba(17, 17, 17, 0.6);
+  margin: 0;
 }
 
 .admin-card {

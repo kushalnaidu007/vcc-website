@@ -137,12 +137,22 @@ const renderMatches = (items) => {
     const link = item.link
       ? `<a class="btn btn-outline" href="${item.link}" target="_blank" rel="noopener">View scorecard</a>`
       : '';
+    const preview =
+      item.summary && item.summary.length > 180
+        ? `${item.summary.slice(0, 180)}...`
+        : item.summary;
     card.innerHTML =
       `<span class="card-meta">${item.date}</span>` +
       `<h3>${item.title}</h3>` +
       `<p><strong>${item.result}</strong></p>` +
-      `<p>${item.summary}</p>` +
+      `<p>${preview || ''}</p>` +
+      `<button class="btn btn-outline" type="button" data-open-modal>Read more</button>` +
       link;
+    card.dataset.fullSummary = item.summary || '';
+    card.dataset.title = item.title || '';
+    card.dataset.date = item.date || '';
+    card.dataset.result = item.result || '';
+    card.dataset.link = item.link || '';
     fragment.appendChild(card);
   });
   matchesList.appendChild(fragment);
@@ -161,6 +171,72 @@ if (matchesList) {
     .then((res) => res.json())
     .then((data) => renderMatches(Array.isArray(data) ? data : []))
     .catch(() => renderMatches([]));
+}
+
+const setupCarousel = (name) => {
+  const track = document.querySelector(`[data-carousel="${name}"]`);
+  const prev = document.querySelector(`[data-carousel-prev="${name}"]`);
+  const next = document.querySelector(`[data-carousel-next="${name}"]`);
+  if (!track || !prev || !next) return;
+
+  const scrollByCard = () => {
+    const first = track.querySelector('*');
+    const gap = 20;
+    return first ? first.clientWidth + gap : 300;
+  };
+
+  prev.addEventListener('click', () => {
+    track.scrollBy({ left: -scrollByCard() * 3, behavior: 'smooth' });
+  });
+
+  next.addEventListener('click', () => {
+    track.scrollBy({ left: scrollByCard() * 3, behavior: 'smooth' });
+  });
+};
+
+setupCarousel('news');
+setupCarousel('matches');
+
+const modal = document.getElementById('match-modal');
+if (modal) {
+  const titleEl = document.getElementById('match-modal-title');
+  const metaEl = document.getElementById('match-modal-meta');
+  const bodyEl = document.getElementById('match-modal-body');
+  const linkEl = document.getElementById('match-modal-link');
+
+  const closeModal = () => {
+    modal.classList.remove('is-open');
+    modal.setAttribute('aria-hidden', 'true');
+  };
+
+  document.addEventListener('click', (event) => {
+    const openBtn = event.target.closest('[data-open-modal]');
+    if (openBtn) {
+      const card = openBtn.closest('.match-card');
+      if (!card) return;
+      titleEl.textContent = card.dataset.title;
+      metaEl.textContent = `${card.dataset.date} • ${card.dataset.result}`;
+      bodyEl.textContent = card.dataset.fullSummary;
+      if (card.dataset.link) {
+        linkEl.style.display = 'inline-flex';
+        linkEl.href = card.dataset.link;
+      } else {
+        linkEl.style.display = 'none';
+      }
+      modal.classList.add('is-open');
+      modal.setAttribute('aria-hidden', 'false');
+      return;
+    }
+    if (event.target.matches('[data-modal-close]')) {
+      closeModal();
+    }
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') {
+      closeModal();
+    }
+  });
 }
 
 const newsForm = document.getElementById('news-form');

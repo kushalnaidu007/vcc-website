@@ -116,7 +116,11 @@
       <h2>News & Announcements</h2>
       <p>Latest updates from Victory Cricket Club.</p>
     </div>
-    <div id="news-list" class="news-grid"></div>
+    <div class="carousel">
+      <button class="carousel-nav prev" type="button" aria-label="Previous news" data-carousel-prev="news">‹</button>
+      <div id="news-list" class="news-grid carousel-track" data-carousel="news"></div>
+      <button class="carousel-nav next" type="button" aria-label="Next news" data-carousel-next="news">›</button>
+    </div>
   </div>
 </section>
 
@@ -126,7 +130,11 @@
       <h2>Match Summaries</h2>
       <p>Recent match results and highlights.</p>
     </div>
-    <div id="matches-list" class="matches-grid"></div>
+    <div class="carousel">
+      <button class="carousel-nav prev" type="button" aria-label="Previous matches" data-carousel-prev="matches">‹</button>
+      <div id="matches-list" class="matches-grid carousel-track" data-carousel="matches"></div>
+      <button class="carousel-nav next" type="button" aria-label="Next matches" data-carousel-next="matches">›</button>
+    </div>
   </div>
 </section>
 
@@ -318,5 +326,15 @@
 </div>
 </footer>
 <script src="main.js"></script>
+<div class="modal" id="match-modal" aria-hidden="true">
+  <div class="modal-backdrop" data-modal-close></div>
+  <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="match-modal-title">
+    <button class="modal-close" type="button" data-modal-close aria-label="Close">×</button>
+    <h3 id="match-modal-title"></h3>
+    <p class="modal-meta" id="match-modal-meta"></p>
+    <p id="match-modal-body"></p>
+    <a class="btn btn-outline" id="match-modal-link" href="#" target="_blank" rel="noopener">View scorecard</a>
+  </div>
+</div>
 </body>
 </html>
