@@ -59,25 +59,77 @@ module.exports = async (req, res) => {
   }
 
   const body = await readBody(req);
-  const { title, summary, date, result, link } = body || {};
-  if (!title || !summary || !date || !result) {
+  const { action = 'create' } = body || {};
+  const current = await readCurrent();
+
+  let next = current;
+  let entry = null;
+
+  if (action === 'create') {
+    const { title, summary, date, result, link } = body || {};
+    if (!title || !summary || !date || !result) {
+      res.statusCode = 400;
+      res.end('Missing fields');
+      return;
+    }
+    entry = {
+      id: randomUUID(),
+      title: String(title),
+      summary: String(summary),
+      date: String(date),
+      result: String(result),
+      link: link ? String(link) : '',
+      archived: false,
+      createdAt: new Date().toISOString(),
+    };
+    next = [entry, ...current].slice(0, 50);
+  } else if (action === 'update') {
+    const { id, title, summary, date, result, link } = body || {};
+    if (!id || !title || !summary || !date || !result) {
+      res.statusCode = 400;
+      res.end('Missing fields');
+      return;
+    }
+    next = current.map((item) =>
+      item.id === id
+        ? {
+            ...item,
+            title: String(title),
+            summary: String(summary),
+            date: String(date),
+            result: String(result),
+            link: link ? String(link) : '',
+            updatedAt: new Date().toISOString(),
+          }
+        : item
+    );
+    entry = next.find((item) => item.id === id) || null;
+  } else if (action === 'delete') {
+    const { id } = body || {};
+    if (!id) {
+      res.statusCode = 400;
+      res.end('Missing id');
+      return;
+    }
+    next = current.filter((item) => item.id !== id);
+  } else if (action === 'archive' || action === 'unarchive') {
+    const { id } = body || {};
+    if (!id) {
+      res.statusCode = 400;
+      res.end('Missing id');
+      return;
+    }
+    const archived = action === 'archive';
+    next = current.map((item) =>
+      item.id === id ? { ...item, archived, updatedAt: new Date().toISOString() } : item
+    );
+    entry = next.find((item) => item.id === id) || null;
+  } else {
     res.statusCode = 400;
-    res.end('Missing fields');
+    res.end('Invalid action');
     return;
   }
 
-  const current = await readCurrent();
-  const entry = {
-    id: randomUUID(),
-    title: String(title),
-    summary: String(summary),
-    date: String(date),
-    result: String(result),
-    link: link ? String(link) : '',
-    createdAt: new Date().toISOString(),
-  };
-
-  const next = [entry, ...current].slice(0, 50);
   await put(BLOB_NAME, JSON.stringify(next, null, 2), {
     access: 'public',
     contentType: 'application/json',
@@ -86,5 +138,5 @@ module.exports = async (req, res) => {
 
   res.setHeader('Content-Type', 'application/json');
   res.statusCode = 200;
-  res.end(JSON.stringify(entry));
+  res.end(JSON.stringify(entry || { ok: true }));
 };

@@ -162,14 +162,20 @@ const renderMatches = (items) => {
 if (newsList) {
   fetch('/api/news')
     .then((res) => res.json())
-    .then((data) => renderNews(Array.isArray(data) ? data : []))
+    .then((data) => {
+      const items = Array.isArray(data) ? data : [];
+      renderNews(items.filter((item) => !item.archived));
+    })
     .catch(() => renderNews([]));
 }
 
 if (matchesList) {
   fetch('/api/matches')
     .then((res) => res.json())
-    .then((data) => renderMatches(Array.isArray(data) ? data : []))
+    .then((data) => {
+      const items = Array.isArray(data) ? data : [];
+      renderMatches(items.filter((item) => !item.archived));
+    })
     .catch(() => renderMatches([]));
 }
 
@@ -244,6 +250,42 @@ const matchForm = document.getElementById('match-form');
 const adminToken = document.getElementById('admin-token');
 const newsStatus = document.getElementById('news-status');
 const matchStatus = document.getElementById('match-status');
+const newsManage = document.getElementById('news-manage');
+const matchesManage = document.getElementById('matches-manage');
+
+const refreshAdminLists = async () => {
+  if (!newsManage || !matchesManage) return;
+  const [newsRes, matchesRes] = await Promise.all([fetch('/api/news'), fetch('/api/matches')]);
+  const newsItems = (await newsRes.json()) || [];
+  const matchItems = (await matchesRes.json()) || [];
+  const renderAdminList = (container, items, type) => {
+    container.innerHTML = '';
+    if (!items.length) {
+      container.innerHTML = '<p class="admin-meta">No items yet.</p>';
+      return;
+    }
+    items.forEach((item) => {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'admin-item';
+      wrapper.innerHTML = `
+        <div>
+          <strong>${item.title}</strong>
+          <div class="admin-meta">${item.date}${item.archived ? ' • Archived' : ''}</div>
+        </div>
+        <div class="admin-actions">
+          <button class="primary" data-edit="${type}" data-id="${item.id}">Edit</button>
+          <button class="archive" data-archive="${type}" data-id="${item.id}">${item.archived ? 'Unarchive' : 'Archive'}</button>
+          <button class="danger" data-delete="${type}" data-id="${item.id}">Delete</button>
+        </div>
+      `;
+      wrapper.dataset.item = JSON.stringify(item);
+      container.appendChild(wrapper);
+    });
+  };
+  renderAdminList(newsManage, newsItems, 'news');
+  renderAdminList(matchesManage, matchItems, 'matches');
+};
+
 
 const postItem = async (endpoint, payload, statusEl) => {
   statusEl.textContent = 'Publishing...';
@@ -269,28 +311,93 @@ const postItem = async (endpoint, payload, statusEl) => {
 };
 
 if (newsForm && adminToken && newsStatus) {
+  newsForm.dataset.editId = '';
   newsForm.addEventListener('submit', (event) => {
     event.preventDefault();
-    postItem('/api/news', {
+    const payload = {
       title: document.getElementById('news-title').value,
       summary: document.getElementById('news-body').value,
       date: document.getElementById('news-date').value,
       link: document.getElementById('news-link').value,
-    }, newsStatus);
+    };
+    if (newsForm.dataset.editId) {
+      payload.action = 'update';
+      payload.id = newsForm.dataset.editId;
+    }
+    postItem('/api/news', payload, newsStatus).then(refreshAdminLists);
     newsForm.reset();
+    newsForm.dataset.editId = '';
   });
 }
 
 if (matchForm && adminToken && matchStatus) {
+  matchForm.dataset.editId = '';
   matchForm.addEventListener('submit', (event) => {
     event.preventDefault();
-    postItem('/api/matches', {
+    const payload = {
       title: document.getElementById('match-title').value,
       summary: document.getElementById('match-body').value,
       date: document.getElementById('match-date').value,
       result: document.getElementById('match-result').value,
       link: document.getElementById('match-link').value,
-    }, matchStatus);
+    };
+    if (matchForm.dataset.editId) {
+      payload.action = 'update';
+      payload.id = matchForm.dataset.editId;
+    }
+    postItem('/api/matches', payload, matchStatus).then(refreshAdminLists);
     matchForm.reset();
+    matchForm.dataset.editId = '';
+  });
+}
+
+if (newsManage || matchesManage) {
+  refreshAdminLists();
+
+  document.addEventListener('click', (event) => {
+    const editBtn = event.target.closest('[data-edit]');
+    const archiveBtn = event.target.closest('[data-archive]');
+    const deleteBtn = event.target.closest('[data-delete]');
+
+    if (editBtn) {
+      const type = editBtn.dataset.edit;
+      const item = JSON.parse(editBtn.closest('.admin-item').dataset.item);
+      if (type === 'news') {
+        document.getElementById('news-title').value = item.title || '';
+        document.getElementById('news-body').value = item.summary || '';
+        document.getElementById('news-date').value = item.date || '';
+        document.getElementById('news-link').value = item.link || '';
+        newsForm.dataset.editId = item.id;
+      } else {
+        document.getElementById('match-title').value = item.title || '';
+        document.getElementById('match-body').value = item.summary || '';
+        document.getElementById('match-date').value = item.date || '';
+        document.getElementById('match-result').value = item.result || '';
+        document.getElementById('match-link').value = item.link || '';
+        matchForm.dataset.editId = item.id;
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
+    if (archiveBtn) {
+      const type = archiveBtn.dataset.archive;
+      const item = JSON.parse(archiveBtn.closest('.admin-item').dataset.item);
+      postItem(`/api/${type === 'news' ? 'news' : 'matches'}`, {
+        action: item.archived ? 'unarchive' : 'archive',
+        id: item.id,
+      }, type === 'news' ? newsStatus : matchStatus).then(refreshAdminLists);
+      return;
+    }
+
+    if (deleteBtn) {
+      const type = deleteBtn.dataset.delete;
+      const item = JSON.parse(deleteBtn.closest('.admin-item').dataset.item);
+      if (!confirm('Delete this item?')) return;
+      postItem(`/api/${type === 'news' ? 'news' : 'matches'}`, {
+        action: 'delete',
+        id: item.id,
+      }, type === 'news' ? newsStatus : matchStatus).then(refreshAdminLists);
+    }
   });
 }
