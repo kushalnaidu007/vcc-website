@@ -688,6 +688,23 @@ a.link {
   margin: 0 0 6px;
 }
 
+.contact-map-card {
+  padding-bottom: 14px;
+}
+
+.contact-map {
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.contact-map iframe {
+  display: block;
+  width: 100%;
+  min-height: 240px;
+  border: 0;
+}
+
 .contact-form {
   background: var(--secondary);
   border: 1px solid var(--border);
@@ -1409,6 +1426,158 @@ a.link {
 .policy-card .btn {
   margin-top: auto;
   align-self: flex-start;
+}
+
+.facilities-page {
+  padding: 80px 0;
+  background: var(--secondary);
+}
+
+.facilities-header {
+  max-width: 860px;
+  margin: 0 auto 28px;
+  text-align: center;
+}
+
+.facilities-header h1 {
+  margin: 0 0 8px;
+  font-family: "Teko", sans-serif;
+  font-size: clamp(36px, 5vw, 56px);
+}
+
+.facilities-header p {
+  margin: 0;
+  font-family: "Abel", sans-serif;
+  color: rgba(17, 17, 17, 0.78);
+}
+
+.facility-grid {
+  display: grid;
+  gap: 22px;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  margin-bottom: 22px;
+}
+
+.facility-card {
+  background: var(--muted);
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: var(--shadow-soft);
+}
+
+.facility-card img {
+  width: 100%;
+  height: 260px;
+  object-fit: cover;
+}
+
+.facility-card h2 {
+  margin: 0;
+  padding: 18px 20px 8px;
+  font-family: "Teko", sans-serif;
+  font-size: 30px;
+}
+
+.facility-card p {
+  margin: 0;
+  padding: 0 20px 20px;
+  font-family: "Abel", sans-serif;
+}
+
+.facility-info {
+  background: var(--accent-soft);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 22px;
+}
+
+.facility-info h2 {
+  margin: 0 0 8px;
+  font-family: "Teko", sans-serif;
+  font-size: 32px;
+}
+
+.facility-info p {
+  margin: 0 0 10px;
+  font-family: "Abel", sans-serif;
+}
+
+.facility-info p:last-child {
+  margin-bottom: 0;
+}
+
+.team-page {
+  padding: 80px 0;
+  background: var(--secondary);
+}
+
+.team-page-header {
+  max-width: 860px;
+  margin: 0 auto 28px;
+  text-align: center;
+}
+
+.team-page-header h1 {
+  margin: 0 0 8px;
+  font-family: "Teko", sans-serif;
+  font-size: clamp(36px, 5vw, 56px);
+}
+
+.team-page-header p {
+  margin: 0;
+  font-family: "Abel", sans-serif;
+  color: rgba(17, 17, 17, 0.78);
+}
+
+.team-page-grid {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  margin-bottom: 22px;
+}
+
+.team-page-grid.single {
+  grid-template-columns: 1fr;
+}
+
+.team-page-card {
+  background: var(--muted);
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: var(--shadow-soft);
+}
+
+.team-page-card h2 {
+  margin: 0 0 8px;
+  font-family: "Teko", sans-serif;
+  font-size: 30px;
+}
+
+.team-page-card p {
+  margin: 0 0 8px;
+  font-family: "Abel", sans-serif;
+}
+
+.team-page-card p:last-child {
+  margin-bottom: 0;
+}
+
+.team-page-info {
+  background: var(--accent-soft);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 22px;
+}
+
+.team-page-info h2 {
+  margin: 0 0 8px;
+  font-family: "Teko", sans-serif;
+  font-size: 32px;
+}
+
+.team-page-info p {
+  margin: 0 0 14px;
+  font-family: "Abel", sans-serif;
 }
 
 .gallery {
