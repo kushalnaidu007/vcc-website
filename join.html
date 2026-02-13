@@ -148,6 +148,32 @@
               <textarea id="join-allergies" name="allergies" rows="3" required></textarea>
             </div>
 
+            <div class="form-field consent-block">
+              <h3>Photo & Social Media Consent</h3>
+              <div class="consent-item">
+                <p>I consent to VCC taking photos/videos during training and matches for club records.</p>
+                <div class="consent-options">
+                  <label><input type="radio" name="consent_photos_taken" value="Yes" required /> Yes</label>
+                  <label><input type="radio" name="consent_photos_taken" value="No" required /> No</label>
+                </div>
+              </div>
+              <div class="consent-item">
+                <p>I consent to VCC using my photos/videos on social media and website.</p>
+                <div class="consent-options">
+                  <label><input type="radio" name="consent_social_media" value="Yes" required /> Yes</label>
+                  <label><input type="radio" name="consent_social_media" value="No" required /> No</label>
+                </div>
+              </div>
+              <label class="checkbox-label">
+                <input type="checkbox" name="consent_name_mention" value="Yes" />
+                I am happy for my name to be mentioned in social media posts.
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" name="guardian_consent_under18" value="Yes" />
+                If the applicant is under 18, a parent/guardian confirms this consent.
+              </label>
+            </div>
+
             <div class="form-field">
               <label class="checkbox-label">
                 <input type="checkbox" name="confirmation" required />
