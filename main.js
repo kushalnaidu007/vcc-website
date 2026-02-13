@@ -160,7 +160,7 @@ const renderMatches = (items) => {
 
 
 if (newsList) {
-  fetch('/api/news', { cache: 'no-store' })
+  fetch(`/api/news?t=${Date.now()}`, { cache: 'no-store' })
     .then((res) => res.json())
     .then((data) => {
       const items = Array.isArray(data) ? data : [];
@@ -170,7 +170,7 @@ if (newsList) {
 }
 
 if (matchesList) {
-  fetch('/api/matches', { cache: 'no-store' })
+  fetch(`/api/matches?t=${Date.now()}`, { cache: 'no-store' })
     .then((res) => res.json())
     .then((data) => {
       const items = Array.isArray(data) ? data : [];
@@ -256,10 +256,10 @@ const matchesManage = document.getElementById('matches-manage');
 const refreshAdminLists = async () => {
   if (!newsManage || !matchesManage) return;
   const [newsRes, matchesRes] = await Promise.all([
-    fetch('/api/news', { cache: 'no-store' }),
-    fetch('/api/matches', { cache: 'no-store' }),
+    fetch(`/api/news?t=${Date.now()}`, { cache: 'no-store' }),
+    fetch(`/api/matches?t=${Date.now()}`, { cache: 'no-store' }),
   ]);
-  if (!newsRes.ok || !matchesRes.ok) return;
+  if (!newsRes.ok || !matchesRes.ok) return false;
   const newsItems = (await newsRes.json()) || [];
   const matchItems = (await matchesRes.json()) || [];
   const renderAdminList = (container, items, type) => {
@@ -281,6 +281,7 @@ const refreshAdminLists = async () => {
           <button class="archive" data-archive="${type}" data-id="${item.id}">${item.archived ? 'Unarchive' : 'Archive'}</button>
           <button class="danger" data-delete="${type}" data-id="${item.id}">Delete</button>
         </div>
+        <p class="admin-item-status" aria-live="polite"></p>
       `;
       wrapper.dataset.item = JSON.stringify(item);
       container.appendChild(wrapper);
@@ -288,11 +289,24 @@ const refreshAdminLists = async () => {
   };
   renderAdminList(newsManage, newsItems, 'news');
   renderAdminList(matchesManage, matchItems, 'matches');
+  return true;
 };
 
+const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-const postItem = async (endpoint, payload, statusEl) => {
-  statusEl.textContent = 'Publishing...';
+const refreshAdminListsWithRetry = async () => {
+  for (let attempt = 0; attempt < 4; attempt += 1) {
+    const ok = await refreshAdminLists();
+    if (ok) return true;
+    await wait(600);
+  }
+  return false;
+};
+
+const postItem = async (endpoint, payload, statusEl, messages = {}) => {
+  const pendingText = messages.pending || 'Saving...';
+  const successText = messages.success || 'Saved successfully.';
+  statusEl.textContent = pendingText;
   statusEl.style.color = 'inherit';
   try {
     const res = await fetch(endpoint, {
@@ -307,7 +321,7 @@ const postItem = async (endpoint, payload, statusEl) => {
       const msg = await res.text();
       throw new Error(msg || 'Request failed');
     }
-    statusEl.textContent = 'Published successfully.';
+    statusEl.textContent = successText;
     statusEl.style.color = 'green';
     return true;
   } catch (err) {
@@ -331,11 +345,18 @@ if (newsForm && adminToken && newsStatus) {
       payload.action = 'update';
       payload.id = newsForm.dataset.editId;
     }
-    const ok = await postItem('/api/news', payload, newsStatus);
+    const ok = await postItem(
+      '/api/news',
+      payload,
+      newsStatus,
+      newsForm.dataset.editId
+        ? { pending: 'Updating news...', success: 'News updated successfully.' }
+        : { pending: 'Publishing news...', success: 'News published successfully.' }
+    );
     if (ok) {
       newsForm.reset();
       newsForm.dataset.editId = '';
-      refreshAdminLists();
+      await refreshAdminListsWithRetry();
     }
   });
 }
@@ -355,19 +376,26 @@ if (matchForm && adminToken && matchStatus) {
       payload.action = 'update';
       payload.id = matchForm.dataset.editId;
     }
-    const ok = await postItem('/api/matches', payload, matchStatus);
+    const ok = await postItem(
+      '/api/matches',
+      payload,
+      matchStatus,
+      matchForm.dataset.editId
+        ? { pending: 'Updating summary...', success: 'Match summary updated successfully.' }
+        : { pending: 'Publishing summary...', success: 'Match summary published successfully.' }
+    );
     if (ok) {
       matchForm.reset();
       matchForm.dataset.editId = '';
-      refreshAdminLists();
+      await refreshAdminListsWithRetry();
     }
   });
 }
 
 if (newsManage || matchesManage) {
-  refreshAdminLists();
+  refreshAdminListsWithRetry();
 
-  document.addEventListener('click', (event) => {
+  document.addEventListener('click', async (event) => {
     const editBtn = event.target.closest('[data-edit]');
     const archiveBtn = event.target.closest('[data-archive]');
     const deleteBtn = event.target.closest('[data-delete]');
@@ -394,27 +422,42 @@ if (newsManage || matchesManage) {
     }
 
     if (archiveBtn) {
+      const itemRow = archiveBtn.closest('.admin-item');
+      const rowStatus = itemRow.querySelector('.admin-item-status');
       const type = archiveBtn.dataset.archive;
-      const item = JSON.parse(archiveBtn.closest('.admin-item').dataset.item);
-      postItem(`/api/${type === 'news' ? 'news' : 'matches'}`, {
-        action: item.archived ? 'unarchive' : 'archive',
-        id: item.id,
-      }, type === 'news' ? newsStatus : matchStatus).then((ok) => {
-        if (ok) refreshAdminLists();
-      });
+      const item = JSON.parse(itemRow.dataset.item);
+      const shouldArchive = !item.archived;
+      const ok = await postItem(
+        `/api/${type === 'news' ? 'news' : 'matches'}`,
+        {
+          action: shouldArchive ? 'archive' : 'unarchive',
+          id: item.id,
+        },
+        rowStatus,
+        shouldArchive
+          ? { pending: 'Archiving item...', success: 'Item archived.' }
+          : { pending: 'Restoring item...', success: 'Item unarchived.' }
+      );
+      if (ok) await refreshAdminListsWithRetry();
       return;
     }
 
     if (deleteBtn) {
+      const itemRow = deleteBtn.closest('.admin-item');
+      const rowStatus = itemRow.querySelector('.admin-item-status');
       const type = deleteBtn.dataset.delete;
-      const item = JSON.parse(deleteBtn.closest('.admin-item').dataset.item);
+      const item = JSON.parse(itemRow.dataset.item);
       if (!confirm('Delete this item?')) return;
-      postItem(`/api/${type === 'news' ? 'news' : 'matches'}`, {
-        action: 'delete',
-        id: item.id,
-      }, type === 'news' ? newsStatus : matchStatus).then((ok) => {
-        if (ok) refreshAdminLists();
-      });
+      const ok = await postItem(
+        `/api/${type === 'news' ? 'news' : 'matches'}`,
+        {
+          action: 'delete',
+          id: item.id,
+        },
+        rowStatus,
+        { pending: 'Deleting item...', success: 'Item deleted.' }
+      );
+      if (ok) await refreshAdminListsWithRetry();
     }
   });
 }

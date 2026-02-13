@@ -1399,6 +1399,13 @@ a.link {
   color: rgba(17, 17, 17, 0.6);
 }
 
+.admin-item-status {
+  margin: 0;
+  font-family: "Abel", sans-serif;
+  font-size: 13px;
+  color: rgba(17, 17, 17, 0.65);
+}
+
 .policy-card .btn {
   margin-top: auto;
   align-self: flex-start;
