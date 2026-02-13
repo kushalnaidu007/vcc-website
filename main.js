@@ -160,7 +160,7 @@ const renderMatches = (items) => {
 
 
 if (newsList) {
-  fetch('/api/news')
+  fetch('/api/news', { cache: 'no-store' })
     .then((res) => res.json())
     .then((data) => {
       const items = Array.isArray(data) ? data : [];
@@ -170,7 +170,7 @@ if (newsList) {
 }
 
 if (matchesList) {
-  fetch('/api/matches')
+  fetch('/api/matches', { cache: 'no-store' })
     .then((res) => res.json())
     .then((data) => {
       const items = Array.isArray(data) ? data : [];
@@ -255,7 +255,11 @@ const matchesManage = document.getElementById('matches-manage');
 
 const refreshAdminLists = async () => {
   if (!newsManage || !matchesManage) return;
-  const [newsRes, matchesRes] = await Promise.all([fetch('/api/news'), fetch('/api/matches')]);
+  const [newsRes, matchesRes] = await Promise.all([
+    fetch('/api/news', { cache: 'no-store' }),
+    fetch('/api/matches', { cache: 'no-store' }),
+  ]);
+  if (!newsRes.ok || !matchesRes.ok) return;
   const newsItems = (await newsRes.json()) || [];
   const matchItems = (await matchesRes.json()) || [];
   const renderAdminList = (container, items, type) => {
@@ -289,6 +293,7 @@ const refreshAdminLists = async () => {
 
 const postItem = async (endpoint, payload, statusEl) => {
   statusEl.textContent = 'Publishing...';
+  statusEl.style.color = 'inherit';
   try {
     const res = await fetch(endpoint, {
       method: 'POST',
@@ -304,15 +309,17 @@ const postItem = async (endpoint, payload, statusEl) => {
     }
     statusEl.textContent = 'Published successfully.';
     statusEl.style.color = 'green';
+    return true;
   } catch (err) {
-    statusEl.textContent = 'Failed to publish. Check token and try again.';
+    statusEl.textContent = `Failed: ${err.message}`;
     statusEl.style.color = 'crimson';
+    return false;
   }
 };
 
 if (newsForm && adminToken && newsStatus) {
   newsForm.dataset.editId = '';
-  newsForm.addEventListener('submit', (event) => {
+  newsForm.addEventListener('submit', async (event) => {
     event.preventDefault();
     const payload = {
       title: document.getElementById('news-title').value,
@@ -324,15 +331,18 @@ if (newsForm && adminToken && newsStatus) {
       payload.action = 'update';
       payload.id = newsForm.dataset.editId;
     }
-    postItem('/api/news', payload, newsStatus).then(refreshAdminLists);
-    newsForm.reset();
-    newsForm.dataset.editId = '';
+    const ok = await postItem('/api/news', payload, newsStatus);
+    if (ok) {
+      newsForm.reset();
+      newsForm.dataset.editId = '';
+      refreshAdminLists();
+    }
   });
 }
 
 if (matchForm && adminToken && matchStatus) {
   matchForm.dataset.editId = '';
-  matchForm.addEventListener('submit', (event) => {
+  matchForm.addEventListener('submit', async (event) => {
     event.preventDefault();
     const payload = {
       title: document.getElementById('match-title').value,
@@ -345,9 +355,12 @@ if (matchForm && adminToken && matchStatus) {
       payload.action = 'update';
       payload.id = matchForm.dataset.editId;
     }
-    postItem('/api/matches', payload, matchStatus).then(refreshAdminLists);
-    matchForm.reset();
-    matchForm.dataset.editId = '';
+    const ok = await postItem('/api/matches', payload, matchStatus);
+    if (ok) {
+      matchForm.reset();
+      matchForm.dataset.editId = '';
+      refreshAdminLists();
+    }
   });
 }
 
@@ -386,7 +399,9 @@ if (newsManage || matchesManage) {
       postItem(`/api/${type === 'news' ? 'news' : 'matches'}`, {
         action: item.archived ? 'unarchive' : 'archive',
         id: item.id,
-      }, type === 'news' ? newsStatus : matchStatus).then(refreshAdminLists);
+      }, type === 'news' ? newsStatus : matchStatus).then((ok) => {
+        if (ok) refreshAdminLists();
+      });
       return;
     }
 
@@ -397,7 +412,9 @@ if (newsManage || matchesManage) {
       postItem(`/api/${type === 'news' ? 'news' : 'matches'}`, {
         action: 'delete',
         id: item.id,
-      }, type === 'news' ? newsStatus : matchStatus).then(refreshAdminLists);
+      }, type === 'news' ? newsStatus : matchStatus).then((ok) => {
+        if (ok) refreshAdminLists();
+      });
     }
   });
 }

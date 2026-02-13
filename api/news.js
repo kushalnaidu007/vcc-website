@@ -20,9 +20,12 @@ const readBody = async (req) => {
 };
 
 const readCurrent = async () => {
-  const { blobs } = await list({ prefix: BLOB_NAME, limit: 1 });
+  const { blobs } = await list({ prefix: BLOB_NAME, limit: 100 });
   if (!blobs.length) return [];
-  const response = await fetch(blobs[0].url);
+  const latest = [...blobs].sort(
+    (a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime()
+  )[0];
+  const response = await fetch(latest.url, { cache: 'no-store' });
   if (!response.ok) return [];
   const data = await response.json();
   return Array.isArray(data) ? data : [];
@@ -40,6 +43,7 @@ module.exports = async (req, res) => {
   if (req.method === 'GET') {
     const data = await readCurrent();
     res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Cache-Control', 'no-store');
     res.statusCode = 200;
     res.end(JSON.stringify(data));
     return;
@@ -102,6 +106,11 @@ module.exports = async (req, res) => {
         : item
     );
     entry = next.find((item) => item.id === id) || null;
+    if (!entry) {
+      res.statusCode = 404;
+      res.end('Item not found');
+      return;
+    }
   } else if (action === 'delete') {
     const { id } = body || {};
     if (!id) {
@@ -122,6 +131,11 @@ module.exports = async (req, res) => {
       item.id === id ? { ...item, archived, updatedAt: new Date().toISOString() } : item
     );
     entry = next.find((item) => item.id === id) || null;
+    if (!entry) {
+      res.statusCode = 404;
+      res.end('Item not found');
+      return;
+    }
   } else {
     res.statusCode = 400;
     res.end('Invalid action');
