@@ -555,9 +555,12 @@ a.link {
 }
 
 .sponsor-card img {
-  max-height: 70px;
+  width: 150px;
+  height: 70px;
   margin: 0 auto;
+  display: block;
   object-fit: contain;
+  object-position: center;
 }
 
 .sponsor-card span {

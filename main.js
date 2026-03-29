@@ -461,3 +461,61 @@ if (newsManage || matchesManage) {
     }
   });
 }
+
+const contactForm = document.getElementById('contact-form');
+const contactFormStatus = document.getElementById('contact-form-status');
+
+if (contactForm && contactFormStatus) {
+  contactForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    contactFormStatus.textContent = 'Submitting...';
+    contactFormStatus.style.color = 'inherit';
+    try {
+      const formData = Object.fromEntries(new FormData(contactForm).entries());
+      const res = await fetch('/api/contact-submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+      if (!res.ok) {
+        const msg = await res.text();
+        throw new Error(msg || 'Unable to submit');
+      }
+      contactFormStatus.textContent = 'Thanks, your message has been sent.';
+      contactFormStatus.style.color = 'green';
+      contactForm.reset();
+    } catch (error) {
+      contactFormStatus.textContent = `Failed to submit: ${error.message}`;
+      contactFormStatus.style.color = 'crimson';
+    }
+  });
+}
+
+const joinForm = document.getElementById('join-form');
+const joinFormStatus = document.getElementById('join-form-status');
+
+if (joinForm && joinFormStatus) {
+  joinForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    joinFormStatus.textContent = 'Submitting...';
+    joinFormStatus.style.color = 'inherit';
+    try {
+      const formData = Object.fromEntries(new FormData(joinForm).entries());
+      const res = await fetch('/api/join-submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+      if (!res.ok) {
+        const msg = await res.text();
+        throw new Error(msg || 'Unable to submit');
+      }
+      joinFormStatus.textContent = 'Thanks, your registration request has been sent.';
+      joinFormStatus.style.color = 'green';
+      joinForm.reset();
+    } catch (error) {
+      joinFormStatus.textContent = `Failed to submit: ${error.message}`;
+      joinFormStatus.style.color = 'crimson';
+    }
+  });
+}
