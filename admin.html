@@ -43,20 +43,77 @@
     </header>
 
     <main>
-      <section class="admin-page">
+      <section class="admin-page" data-admin-root>
         <div class="container">
           <div class="admin-header">
             <h1>Admin</h1>
-            <p>Publish news and match summaries. Use your admin token to submit updates.</p>
+            <p>Sign in to publish news and match summaries for Victory CC.</p>
           </div>
 
-          <div class="admin-card">
-            <label for="admin-token">Admin Token</label>
-            <input id="admin-token" type="password" placeholder="Enter admin token" />
-            <p class="admin-hint">Keep this token private. It is required to publish updates.</p>
+          <div class="admin-card admin-auth-card">
+            <div class="admin-auth-head">
+              <div>
+                <h2>Admin Login</h2>
+                <p class="admin-hint">Use your admin email and password. Forgot password will send a reset link to your inbox.</p>
+              </div>
+              <div id="admin-session" class="admin-session" hidden>
+                <p id="admin-user-email" class="admin-hint"></p>
+                <button id="admin-logout" class="btn btn-outline" type="button">Log Out</button>
+              </div>
+            </div>
+
+            <form id="admin-login-form" class="admin-form">
+              <div class="form-row">
+                <div class="form-field">
+                  <label for="admin-email">Email</label>
+                  <input id="admin-email" type="email" autocomplete="email" required />
+                </div>
+                <div class="form-field">
+                  <label for="admin-password">Password</label>
+                  <input id="admin-password" type="password" autocomplete="current-password" required />
+                </div>
+              </div>
+              <div class="admin-auth-actions">
+                <button class="btn" type="submit">Sign In</button>
+                <button id="admin-reset-toggle" class="btn btn-outline" type="button">Forgot Password?</button>
+              </div>
+            </form>
+
+            <form id="admin-reset-form" class="admin-form" hidden>
+              <div class="form-field">
+                <label for="admin-reset-email">Reset Email</label>
+                <input id="admin-reset-email" type="email" autocomplete="email" />
+              </div>
+              <div class="admin-auth-actions">
+                <button class="btn" type="submit">Send Reset Link</button>
+                <button id="admin-reset-cancel" class="btn btn-outline" type="button">Back to Login</button>
+              </div>
+            </form>
+
+            <form id="admin-password-form" class="admin-form" hidden>
+              <div class="form-row">
+                <div class="form-field">
+                  <label for="admin-new-password">New Password</label>
+                  <input id="admin-new-password" type="password" autocomplete="new-password" minlength="8" />
+                </div>
+                <div class="form-field">
+                  <label for="admin-confirm-password">Confirm Password</label>
+                  <input id="admin-confirm-password" type="password" autocomplete="new-password" minlength="8" />
+                </div>
+              </div>
+              <div class="admin-auth-actions">
+                <button class="btn" type="submit">Update Password</button>
+              </div>
+            </form>
+
+            <p id="admin-auth-status" class="admin-status" aria-live="polite"></p>
           </div>
 
-          <div class="admin-grid">
+          <div id="admin-locked" class="admin-card">
+            <p class="admin-hint">Sign in to manage news and match summaries.</p>
+          </div>
+
+          <div id="admin-content" class="admin-grid" hidden>
             <section class="admin-panel">
               <h2>News / Announcements</h2>
               <form id="news-form" class="admin-form">
@@ -165,6 +222,7 @@
       </div>
     </footer>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="main.js"></script>
   </body>
 </html>
