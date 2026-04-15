@@ -267,6 +267,12 @@ const adminLocked = document.getElementById('admin-locked');
 let adminAccessToken = '';
 let supabaseClient = null;
 
+const setElementVisible = (element, visible, displayValue = '') => {
+  if (!element) return;
+  element.hidden = !visible;
+  element.style.display = visible ? displayValue : 'none';
+};
+
 const isPasswordRecoveryMode = () => {
   const hash = new URLSearchParams(window.location.hash.replace(/^#/, ''));
   const search = new URLSearchParams(window.location.search);
@@ -285,28 +291,30 @@ const setAdminAuthenticatedState = (session) => {
 
   if (!adminRoot) return;
 
-  if (adminSession) adminSession.hidden = !user;
-  if (adminContent) adminContent.hidden = !user;
-  if (adminLocked) adminLocked.hidden = !!user;
+  setElementVisible(adminSession, !!user, 'grid');
+  setElementVisible(adminContent, !!user, 'grid');
+  setElementVisible(adminLocked, !user, 'grid');
 
   if (adminUserEmail) {
     adminUserEmail.textContent = user?.email ? `Signed in as ${user.email}` : '';
   }
 
   if (user) {
-    if (adminLoginForm) adminLoginForm.hidden = true;
-    if (adminResetForm) adminResetForm.hidden = true;
-    if (adminPasswordForm && !isPasswordRecoveryMode()) adminPasswordForm.hidden = true;
-    if (adminResetToggle) adminResetToggle.hidden = true;
-    if (adminResetCancel) adminResetCancel.hidden = true;
+    setElementVisible(adminLoginForm, false);
+    setElementVisible(adminResetForm, false);
+    if (!isPasswordRecoveryMode()) {
+      setElementVisible(adminPasswordForm, false);
+    }
+    setElementVisible(adminResetToggle, false);
+    setElementVisible(adminResetCancel, false);
     return;
   }
 
-  if (adminLoginForm) adminLoginForm.hidden = false;
-  if (adminResetForm) adminResetForm.hidden = true;
-  if (adminPasswordForm) adminPasswordForm.hidden = true;
-  if (adminResetToggle) adminResetToggle.hidden = false;
-  if (adminResetCancel) adminResetCancel.hidden = false;
+  setElementVisible(adminLoginForm, true, 'grid');
+  setElementVisible(adminResetForm, false);
+  setElementVisible(adminPasswordForm, false);
+  setElementVisible(adminResetToggle, true);
+  setElementVisible(adminResetCancel, false);
 };
 
 const refreshAdminLists = async () => {
@@ -591,10 +599,10 @@ const initAdminAuth = async () => {
       setAdminAuthenticatedState(session);
 
       if (eventName === 'PASSWORD_RECOVERY' || isPasswordRecoveryMode()) {
-        if (adminLoginForm) adminLoginForm.hidden = true;
-        if (adminResetForm) adminResetForm.hidden = true;
-        if (adminPasswordForm) adminPasswordForm.hidden = false;
-        if (adminLocked) adminLocked.hidden = true;
+        setElementVisible(adminLoginForm, false);
+        setElementVisible(adminResetForm, false);
+        setElementVisible(adminPasswordForm, true, 'grid');
+        setElementVisible(adminLocked, false);
         setAdminAuthStatus('Choose a new password for your admin account.');
         return;
       }
@@ -619,10 +627,10 @@ const initAdminAuth = async () => {
       setAdminAuthStatus('');
       await refreshAdminListsWithRetry();
     } else if (isPasswordRecoveryMode()) {
-      if (adminLoginForm) adminLoginForm.hidden = true;
-      if (adminResetForm) adminResetForm.hidden = true;
-      if (adminPasswordForm) adminPasswordForm.hidden = false;
-      if (adminLocked) adminLocked.hidden = true;
+      setElementVisible(adminLoginForm, false);
+      setElementVisible(adminResetForm, false);
+      setElementVisible(adminPasswordForm, true, 'grid');
+      setElementVisible(adminLocked, false);
       setAdminAuthStatus('Choose a new password for your admin account.');
     } else {
       setAdminAuthStatus('Sign in to manage club updates.');
@@ -655,9 +663,9 @@ if (adminLoginForm) {
 
 if (adminResetToggle) {
   adminResetToggle.addEventListener('click', () => {
-    if (adminLoginForm) adminLoginForm.hidden = true;
-    if (adminResetForm) adminResetForm.hidden = false;
-    if (adminPasswordForm) adminPasswordForm.hidden = true;
+    setElementVisible(adminLoginForm, false);
+    setElementVisible(adminResetForm, true, 'grid');
+    setElementVisible(adminPasswordForm, false);
     setAdminAuthStatus('Enter your email to receive a reset link.');
     const emailField = document.getElementById('admin-email');
     const resetEmailField = document.getElementById('admin-reset-email');
@@ -669,8 +677,8 @@ if (adminResetToggle) {
 
 if (adminResetCancel) {
   adminResetCancel.addEventListener('click', () => {
-    if (adminLoginForm) adminLoginForm.hidden = false;
-    if (adminResetForm) adminResetForm.hidden = true;
+    setElementVisible(adminLoginForm, true, 'grid');
+    setElementVisible(adminResetForm, false);
     setAdminAuthStatus('Sign in to manage club updates.');
   });
 }
