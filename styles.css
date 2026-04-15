@@ -1438,6 +1438,26 @@ a.link {
   display: none !important;
 }
 
+[data-admin-state='signed-in'] #admin-login-form,
+[data-admin-state='signed-in'] #admin-reset-form,
+[data-admin-state='signed-in'] #admin-password-form,
+[data-admin-state='signed-in'] #admin-reset-toggle,
+[data-admin-state='signed-in'] #admin-reset-cancel {
+  display: none !important;
+}
+
+[data-admin-state='reset'] #admin-login-form,
+[data-admin-state='reset'] #admin-password-form {
+  display: none !important;
+}
+
+[data-admin-state='recovery'] #admin-login-form,
+[data-admin-state='recovery'] #admin-reset-form,
+[data-admin-state='recovery'] #admin-reset-toggle,
+[data-admin-state='recovery'] #admin-reset-cancel {
+  display: none !important;
+}
+
 .admin-list {
   display: grid;
   gap: 12px;

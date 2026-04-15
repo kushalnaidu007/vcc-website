@@ -290,6 +290,7 @@ const setAdminAuthenticatedState = (session) => {
   adminAccessToken = session?.access_token || '';
 
   if (!adminRoot) return;
+  adminRoot.dataset.adminState = user ? 'signed-in' : 'signed-out';
 
   setElementVisible(adminSession, !!user, 'grid');
   setElementVisible(adminContent, !!user, 'grid');
@@ -599,6 +600,7 @@ const initAdminAuth = async () => {
       setAdminAuthenticatedState(session);
 
       if (eventName === 'PASSWORD_RECOVERY' || isPasswordRecoveryMode()) {
+        adminRoot.dataset.adminState = 'recovery';
         setElementVisible(adminLoginForm, false);
         setElementVisible(adminResetForm, false);
         setElementVisible(adminPasswordForm, true, 'grid');
@@ -627,6 +629,7 @@ const initAdminAuth = async () => {
       setAdminAuthStatus('');
       await refreshAdminListsWithRetry();
     } else if (isPasswordRecoveryMode()) {
+      adminRoot.dataset.adminState = 'recovery';
       setElementVisible(adminLoginForm, false);
       setElementVisible(adminResetForm, false);
       setElementVisible(adminPasswordForm, true, 'grid');
@@ -663,6 +666,7 @@ if (adminLoginForm) {
 
 if (adminResetToggle) {
   adminResetToggle.addEventListener('click', () => {
+    if (adminRoot) adminRoot.dataset.adminState = 'reset';
     setElementVisible(adminLoginForm, false);
     setElementVisible(adminResetForm, true, 'grid');
     setElementVisible(adminPasswordForm, false);
@@ -677,6 +681,7 @@ if (adminResetToggle) {
 
 if (adminResetCancel) {
   adminResetCancel.addEventListener('click', () => {
+    if (adminRoot) adminRoot.dataset.adminState = 'signed-out';
     setElementVisible(adminLoginForm, true, 'grid');
     setElementVisible(adminResetForm, false);
     setAdminAuthStatus('Sign in to manage club updates.');
