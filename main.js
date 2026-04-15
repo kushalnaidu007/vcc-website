@@ -273,6 +273,8 @@ const setElementVisible = (element, visible, displayValue = '') => {
   element.style.display = visible ? displayValue : 'none';
 };
 
+const getAdminRedirectUrl = () => new URL('/admin', window.location.origin).toString();
+
 const isPasswordRecoveryMode = () => {
   const hash = new URLSearchParams(window.location.hash.replace(/^#/, ''));
   const search = new URLSearchParams(window.location.search);
@@ -702,7 +704,7 @@ if (adminResetForm) {
     setAdminAuthStatus('Sending reset link...');
 
     const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}${window.location.pathname}`,
+      redirectTo: getAdminRedirectUrl(),
     });
 
     if (error) {
