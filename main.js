@@ -273,7 +273,7 @@ const setElementVisible = (element, visible, displayValue = '') => {
   element.style.display = visible ? displayValue : 'none';
 };
 
-const getAdminRedirectUrl = () => new URL('/admin', window.location.origin).toString();
+const getAdminRedirectUrl = () => new URL('/admin.html', window.location.origin).toString();
 
 const isPasswordRecoveryMode = () => {
   const hash = new URLSearchParams(window.location.hash.replace(/^#/, ''));
