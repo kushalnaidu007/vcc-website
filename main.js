@@ -297,12 +297,16 @@ const setAdminAuthenticatedState = (session) => {
     if (adminLoginForm) adminLoginForm.hidden = true;
     if (adminResetForm) adminResetForm.hidden = true;
     if (adminPasswordForm && !isPasswordRecoveryMode()) adminPasswordForm.hidden = true;
+    if (adminResetToggle) adminResetToggle.hidden = true;
+    if (adminResetCancel) adminResetCancel.hidden = true;
     return;
   }
 
   if (adminLoginForm) adminLoginForm.hidden = false;
   if (adminResetForm) adminResetForm.hidden = true;
   if (adminPasswordForm) adminPasswordForm.hidden = true;
+  if (adminResetToggle) adminResetToggle.hidden = false;
+  if (adminResetCancel) adminResetCancel.hidden = false;
 };
 
 const refreshAdminLists = async () => {
