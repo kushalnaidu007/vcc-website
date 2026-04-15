@@ -345,6 +345,10 @@ const refreshAdminLists = async () => {
 };
 
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+const nextFrame = () =>
+  new Promise((resolve) => {
+    window.requestAnimationFrame(() => resolve());
+  });
 
 const refreshAdminListsWithRetry = async () => {
   for (let attempt = 0; attempt < 4; attempt += 1) {
@@ -484,18 +488,28 @@ if (newsManage || matchesManage) {
       const type = archiveBtn.dataset.archive;
       const item = JSON.parse(itemRow.dataset.item);
       const shouldArchive = !item.archived;
-      const ok = await postItem(
-        `/api/${type === 'news' ? 'news' : 'matches'}`,
-        {
-          action: shouldArchive ? 'archive' : 'unarchive',
-          id: item.id,
-        },
-        rowStatus,
-        shouldArchive
-          ? { pending: 'Archiving item...', success: 'Item archived.' }
-          : { pending: 'Restoring item...', success: 'Item unarchived.' }
-      );
-      if (ok) await refreshAdminListsWithRetry();
+      rowStatus.textContent = shouldArchive ? 'Archiving item...' : 'Restoring item...';
+      rowStatus.style.color = 'inherit';
+      archiveBtn.disabled = true;
+
+      window.setTimeout(async () => {
+        const ok = await postItem(
+          `/api/${type === 'news' ? 'news' : 'matches'}`,
+          {
+            action: shouldArchive ? 'archive' : 'unarchive',
+            id: item.id,
+          },
+          rowStatus,
+          shouldArchive
+            ? { pending: 'Archiving item...', success: 'Item archived.' }
+            : { pending: 'Restoring item...', success: 'Item unarchived.' }
+        );
+        archiveBtn.disabled = false;
+        if (ok) {
+          await nextFrame();
+          refreshAdminListsWithRetry();
+        }
+      }, 0);
       return;
     }
 
@@ -524,16 +538,27 @@ if (newsManage || matchesManage) {
 
       deleteBtn.dataset.confirming = 'false';
       deleteBtn.textContent = 'Delete';
-      const ok = await postItem(
-        `/api/${type === 'news' ? 'news' : 'matches'}`,
-        {
-          action: 'delete',
-          id: item.id,
-        },
-        rowStatus,
-        { pending: 'Deleting item...', success: 'Item deleted.' }
-      );
-      if (ok) await refreshAdminListsWithRetry();
+      rowStatus.textContent = 'Deleting item...';
+      rowStatus.style.color = 'inherit';
+      deleteBtn.disabled = true;
+
+      window.setTimeout(async () => {
+        const ok = await postItem(
+          `/api/${type === 'news' ? 'news' : 'matches'}`,
+          {
+            action: 'delete',
+            id: item.id,
+          },
+          rowStatus,
+          { pending: 'Deleting item...', success: 'Item deleted.' }
+        );
+        deleteBtn.disabled = false;
+        if (ok) {
+          itemRow.style.opacity = '0.5';
+          await nextFrame();
+          refreshAdminListsWithRetry();
+        }
+      }, 0);
     }
   });
 }
