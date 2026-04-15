@@ -504,7 +504,26 @@ if (newsManage || matchesManage) {
       const rowStatus = itemRow.querySelector('.admin-item-status');
       const type = deleteBtn.dataset.delete;
       const item = JSON.parse(itemRow.dataset.item);
-      if (!confirm('Delete this item?')) return;
+
+      if (deleteBtn.dataset.confirming !== 'true') {
+        deleteBtn.dataset.confirming = 'true';
+        deleteBtn.textContent = 'Confirm Delete';
+        rowStatus.textContent = 'Click delete again to confirm.';
+        rowStatus.style.color = '#a00000';
+
+        window.setTimeout(() => {
+          if (deleteBtn.dataset.confirming === 'true') {
+            deleteBtn.dataset.confirming = 'false';
+            deleteBtn.textContent = 'Delete';
+            rowStatus.textContent = '';
+            rowStatus.style.color = '';
+          }
+        }, 5000);
+        return;
+      }
+
+      deleteBtn.dataset.confirming = 'false';
+      deleteBtn.textContent = 'Delete';
       const ok = await postItem(
         `/api/${type === 'news' ? 'news' : 'matches'}`,
         {
