@@ -247,11 +247,78 @@ if (modal) {
 
 const newsForm = document.getElementById('news-form');
 const matchForm = document.getElementById('match-form');
-const adminToken = document.getElementById('admin-token');
 const newsStatus = document.getElementById('news-status');
 const matchStatus = document.getElementById('match-status');
 const newsManage = document.getElementById('news-manage');
 const matchesManage = document.getElementById('matches-manage');
+const adminRoot = document.querySelector('[data-admin-root]');
+const adminLoginForm = document.getElementById('admin-login-form');
+const adminResetForm = document.getElementById('admin-reset-form');
+const adminPasswordForm = document.getElementById('admin-password-form');
+const adminResetToggle = document.getElementById('admin-reset-toggle');
+const adminResetCancel = document.getElementById('admin-reset-cancel');
+const adminLogout = document.getElementById('admin-logout');
+const adminAuthStatus = document.getElementById('admin-auth-status');
+const adminSession = document.getElementById('admin-session');
+const adminUserEmail = document.getElementById('admin-user-email');
+const adminContent = document.getElementById('admin-content');
+const adminLocked = document.getElementById('admin-locked');
+
+let adminAccessToken = '';
+let supabaseClient = null;
+
+const setElementVisible = (element, visible, displayValue = '') => {
+  if (!element) return;
+  element.hidden = !visible;
+  element.style.display = visible ? displayValue : 'none';
+};
+
+const getAdminRedirectUrl = () => new URL('/admin.html', window.location.origin).toString();
+
+const isPasswordRecoveryMode = () => {
+  const hash = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+  const search = new URLSearchParams(window.location.search);
+  return hash.get('type') === 'recovery' || search.get('type') === 'recovery';
+};
+
+const setAdminAuthStatus = (message, color = '') => {
+  if (!adminAuthStatus) return;
+  adminAuthStatus.textContent = message || '';
+  adminAuthStatus.style.color = color || 'inherit';
+};
+
+const setAdminAuthenticatedState = (session) => {
+  const user = session?.user || null;
+  adminAccessToken = session?.access_token || '';
+
+  if (!adminRoot) return;
+  adminRoot.dataset.adminState = user ? 'signed-in' : 'signed-out';
+
+  setElementVisible(adminSession, !!user, 'grid');
+  setElementVisible(adminContent, !!user, 'grid');
+  setElementVisible(adminLocked, !user, 'grid');
+
+  if (adminUserEmail) {
+    adminUserEmail.textContent = user?.email ? `Signed in as ${user.email}` : '';
+  }
+
+  if (user) {
+    setElementVisible(adminLoginForm, false);
+    setElementVisible(adminResetForm, false);
+    if (!isPasswordRecoveryMode()) {
+      setElementVisible(adminPasswordForm, false);
+    }
+    setElementVisible(adminResetToggle, false);
+    setElementVisible(adminResetCancel, false);
+    return;
+  }
+
+  setElementVisible(adminLoginForm, true, 'grid');
+  setElementVisible(adminResetForm, false);
+  setElementVisible(adminPasswordForm, false);
+  setElementVisible(adminResetToggle, true);
+  setElementVisible(adminResetCancel, false);
+};
 
 const refreshAdminLists = async () => {
   if (!newsManage || !matchesManage) return;
@@ -293,6 +360,10 @@ const refreshAdminLists = async () => {
 };
 
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+const nextFrame = () =>
+  new Promise((resolve) => {
+    window.requestAnimationFrame(() => resolve());
+  });
 
 const refreshAdminListsWithRetry = async () => {
   for (let attempt = 0; attempt < 4; attempt += 1) {
@@ -308,12 +379,19 @@ const postItem = async (endpoint, payload, statusEl, messages = {}) => {
   const successText = messages.success || 'Saved successfully.';
   statusEl.textContent = pendingText;
   statusEl.style.color = 'inherit';
+
+  if (!adminAccessToken) {
+    statusEl.textContent = 'Failed: Please sign in first.';
+    statusEl.style.color = 'crimson';
+    return false;
+  }
+
   try {
     const res = await fetch(endpoint, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-Admin-Token': adminToken.value.trim(),
+        Authorization: `Bearer ${adminAccessToken}`,
       },
       body: JSON.stringify(payload),
     });
@@ -331,7 +409,7 @@ const postItem = async (endpoint, payload, statusEl, messages = {}) => {
   }
 };
 
-if (newsForm && adminToken && newsStatus) {
+if (newsForm && newsStatus) {
   newsForm.dataset.editId = '';
   newsForm.addEventListener('submit', async (event) => {
     event.preventDefault();
@@ -361,7 +439,7 @@ if (newsForm && adminToken && newsStatus) {
   });
 }
 
-if (matchForm && adminToken && matchStatus) {
+if (matchForm && matchStatus) {
   matchForm.dataset.editId = '';
   matchForm.addEventListener('submit', async (event) => {
     event.preventDefault();
@@ -393,8 +471,6 @@ if (matchForm && adminToken && matchStatus) {
 }
 
 if (newsManage || matchesManage) {
-  refreshAdminListsWithRetry();
-
   document.addEventListener('click', async (event) => {
     const editBtn = event.target.closest('[data-edit]');
     const archiveBtn = event.target.closest('[data-archive]');
@@ -427,18 +503,28 @@ if (newsManage || matchesManage) {
       const type = archiveBtn.dataset.archive;
       const item = JSON.parse(itemRow.dataset.item);
       const shouldArchive = !item.archived;
-      const ok = await postItem(
-        `/api/${type === 'news' ? 'news' : 'matches'}`,
-        {
-          action: shouldArchive ? 'archive' : 'unarchive',
-          id: item.id,
-        },
-        rowStatus,
-        shouldArchive
-          ? { pending: 'Archiving item...', success: 'Item archived.' }
-          : { pending: 'Restoring item...', success: 'Item unarchived.' }
-      );
-      if (ok) await refreshAdminListsWithRetry();
+      rowStatus.textContent = shouldArchive ? 'Archiving item...' : 'Restoring item...';
+      rowStatus.style.color = 'inherit';
+      archiveBtn.disabled = true;
+
+      window.setTimeout(async () => {
+        const ok = await postItem(
+          `/api/${type === 'news' ? 'news' : 'matches'}`,
+          {
+            action: shouldArchive ? 'archive' : 'unarchive',
+            id: item.id,
+          },
+          rowStatus,
+          shouldArchive
+            ? { pending: 'Archiving item...', success: 'Item archived.' }
+            : { pending: 'Restoring item...', success: 'Item unarchived.' }
+        );
+        archiveBtn.disabled = false;
+        if (ok) {
+          await nextFrame();
+          refreshAdminListsWithRetry();
+        }
+      }, 0);
       return;
     }
 
@@ -447,20 +533,231 @@ if (newsManage || matchesManage) {
       const rowStatus = itemRow.querySelector('.admin-item-status');
       const type = deleteBtn.dataset.delete;
       const item = JSON.parse(itemRow.dataset.item);
-      if (!confirm('Delete this item?')) return;
-      const ok = await postItem(
-        `/api/${type === 'news' ? 'news' : 'matches'}`,
-        {
-          action: 'delete',
-          id: item.id,
-        },
-        rowStatus,
-        { pending: 'Deleting item...', success: 'Item deleted.' }
-      );
-      if (ok) await refreshAdminListsWithRetry();
+
+      if (deleteBtn.dataset.confirming !== 'true') {
+        deleteBtn.dataset.confirming = 'true';
+        deleteBtn.textContent = 'Confirm Delete';
+        rowStatus.textContent = 'Click delete again to confirm.';
+        rowStatus.style.color = '#a00000';
+
+        window.setTimeout(() => {
+          if (deleteBtn.dataset.confirming === 'true') {
+            deleteBtn.dataset.confirming = 'false';
+            deleteBtn.textContent = 'Delete';
+            rowStatus.textContent = '';
+            rowStatus.style.color = '';
+          }
+        }, 5000);
+        return;
+      }
+
+      deleteBtn.dataset.confirming = 'false';
+      deleteBtn.textContent = 'Delete';
+      rowStatus.textContent = 'Deleting item...';
+      rowStatus.style.color = 'inherit';
+      deleteBtn.disabled = true;
+
+      window.setTimeout(async () => {
+        const ok = await postItem(
+          `/api/${type === 'news' ? 'news' : 'matches'}`,
+          {
+            action: 'delete',
+            id: item.id,
+          },
+          rowStatus,
+          { pending: 'Deleting item...', success: 'Item deleted.' }
+        );
+        deleteBtn.disabled = false;
+        if (ok) {
+          itemRow.style.opacity = '0.5';
+          await nextFrame();
+          refreshAdminListsWithRetry();
+        }
+      }, 0);
     }
   });
 }
+
+const initAdminAuth = async () => {
+  if (!adminRoot || !window.supabase) return;
+
+  setAdminAuthStatus('Loading admin login...');
+
+  try {
+    const configRes = await fetch('/api/admin-config', { cache: 'no-store' });
+    if (!configRes.ok) {
+      throw new Error('Supabase config is unavailable.');
+    }
+
+    const { supabaseUrl, supabaseAnonKey } = await configRes.json();
+    supabaseClient = window.supabase.createClient(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true,
+      },
+    });
+
+    supabaseClient.auth.onAuthStateChange(async (eventName, session) => {
+      setAdminAuthenticatedState(session);
+
+      if (eventName === 'PASSWORD_RECOVERY' || isPasswordRecoveryMode()) {
+        adminRoot.dataset.adminState = 'recovery';
+        setElementVisible(adminLoginForm, false);
+        setElementVisible(adminResetForm, false);
+        setElementVisible(adminPasswordForm, true, 'grid');
+        setElementVisible(adminLocked, false);
+        setAdminAuthStatus('Choose a new password for your admin account.');
+        return;
+      }
+
+      if (session?.user) {
+        setAdminAuthStatus('');
+        await refreshAdminListsWithRetry();
+      } else if (!adminResetForm?.hidden) {
+        setAdminAuthStatus('Enter your email to receive a reset link.');
+      } else {
+        setAdminAuthStatus('Sign in to manage club updates.');
+      }
+    });
+
+    const {
+      data: { session },
+    } = await supabaseClient.auth.getSession();
+
+    setAdminAuthenticatedState(session);
+
+    if (session?.user) {
+      setAdminAuthStatus('');
+      await refreshAdminListsWithRetry();
+    } else if (isPasswordRecoveryMode()) {
+      adminRoot.dataset.adminState = 'recovery';
+      setElementVisible(adminLoginForm, false);
+      setElementVisible(adminResetForm, false);
+      setElementVisible(adminPasswordForm, true, 'grid');
+      setElementVisible(adminLocked, false);
+      setAdminAuthStatus('Choose a new password for your admin account.');
+    } else {
+      setAdminAuthStatus('Sign in to manage club updates.');
+    }
+  } catch (error) {
+    setAdminAuthStatus(error.message || 'Unable to load admin login.', 'crimson');
+  }
+};
+
+if (adminLoginForm) {
+  adminLoginForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    if (!supabaseClient) return;
+
+    const email = document.getElementById('admin-email').value.trim();
+    const password = document.getElementById('admin-password').value;
+
+    setAdminAuthStatus('Signing in...');
+
+    const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+    if (error) {
+      setAdminAuthStatus(error.message || 'Unable to sign in.', 'crimson');
+      return;
+    }
+
+    adminLoginForm.reset();
+    setAdminAuthStatus('Signed in successfully.', 'green');
+  });
+}
+
+if (adminResetToggle) {
+  adminResetToggle.addEventListener('click', () => {
+    if (adminRoot) adminRoot.dataset.adminState = 'reset';
+    setElementVisible(adminLoginForm, false);
+    setElementVisible(adminResetForm, true, 'grid');
+    setElementVisible(adminPasswordForm, false);
+    setAdminAuthStatus('Enter your email to receive a reset link.');
+    const emailField = document.getElementById('admin-email');
+    const resetEmailField = document.getElementById('admin-reset-email');
+    if (emailField && resetEmailField && emailField.value.trim()) {
+      resetEmailField.value = emailField.value.trim();
+    }
+  });
+}
+
+if (adminResetCancel) {
+  adminResetCancel.addEventListener('click', () => {
+    if (adminRoot) adminRoot.dataset.adminState = 'signed-out';
+    setElementVisible(adminLoginForm, true, 'grid');
+    setElementVisible(adminResetForm, false);
+    setAdminAuthStatus('Sign in to manage club updates.');
+  });
+}
+
+if (adminResetForm) {
+  adminResetForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    if (!supabaseClient) return;
+
+    const email = document.getElementById('admin-reset-email').value.trim();
+    if (!email) {
+      setAdminAuthStatus('Enter your email address first.', 'crimson');
+      return;
+    }
+
+    setAdminAuthStatus('Sending reset link...');
+
+    const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+      redirectTo: getAdminRedirectUrl(),
+    });
+
+    if (error) {
+      setAdminAuthStatus(error.message || 'Unable to send reset link.', 'crimson');
+      return;
+    }
+
+    adminResetForm.reset();
+    setAdminAuthStatus('Reset link sent. Check your inbox.', 'green');
+  });
+}
+
+if (adminPasswordForm) {
+  adminPasswordForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    if (!supabaseClient) return;
+
+    const nextPassword = document.getElementById('admin-new-password').value;
+    const confirmPassword = document.getElementById('admin-confirm-password').value;
+
+    if (nextPassword.length < 8) {
+      setAdminAuthStatus('Use at least 8 characters for the new password.', 'crimson');
+      return;
+    }
+
+    if (nextPassword !== confirmPassword) {
+      setAdminAuthStatus('Password confirmation does not match.', 'crimson');
+      return;
+    }
+
+    setAdminAuthStatus('Updating password...');
+
+    const { error } = await supabaseClient.auth.updateUser({ password: nextPassword });
+    if (error) {
+      setAdminAuthStatus(error.message || 'Unable to update password.', 'crimson');
+      return;
+    }
+
+    adminPasswordForm.reset();
+    window.history.replaceState({}, document.title, window.location.pathname);
+    setAdminAuthStatus('Password updated. You can continue using the admin page.', 'green');
+  });
+}
+
+if (adminLogout) {
+  adminLogout.addEventListener('click', async () => {
+    if (!supabaseClient) return;
+    await supabaseClient.auth.signOut();
+    setAdminAuthStatus('Signed out.');
+  });
+}
+
+initAdminAuth();
 
 const contactForm = document.getElementById('contact-form');
 const contactFormStatus = document.getElementById('contact-form-status');

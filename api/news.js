@@ -1,12 +1,13 @@
 const { put, list } = require('@vercel/blob');
 const { randomUUID } = require('crypto');
+const { verifyAdmin } = require('./_supabaseAuth');
 
 const BLOB_NAME = 'news.json';
 
 const withCors = (res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type,X-Admin-Token');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization');
 };
 
 const readBody = async (req) => {
@@ -55,8 +56,8 @@ module.exports = async (req, res) => {
     return;
   }
 
-  const token = req.headers['x-admin-token'];
-  if (!token || token !== process.env.VCC_ADMIN_TOKEN) {
+  const user = await verifyAdmin(req);
+  if (!user) {
     res.statusCode = 401;
     res.end('Unauthorized');
     return;
