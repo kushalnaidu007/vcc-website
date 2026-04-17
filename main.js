@@ -281,6 +281,27 @@ const isPasswordRecoveryMode = () => {
   return hash.get('type') === 'recovery' || search.get('type') === 'recovery';
 };
 
+const setAdminRecoveryState = (session = null) => {
+  adminAccessToken = session?.access_token || adminAccessToken;
+  if (!adminRoot) return;
+
+  adminRoot.dataset.adminState = 'recovery';
+  setElementVisible(adminSession, !!session?.user, 'grid');
+  setElementVisible(adminContent, false);
+  setElementVisible(adminLocked, false);
+  setElementVisible(adminLoginForm, false);
+  setElementVisible(adminResetForm, false);
+  setElementVisible(adminPasswordForm, true, 'grid');
+  setElementVisible(adminResetToggle, false);
+  setElementVisible(adminResetCancel, false);
+
+  if (adminUserEmail) {
+    adminUserEmail.textContent = session?.user?.email ? `Signed in as ${session.user.email}` : '';
+  }
+
+  setAdminAuthStatus('Choose a new password for your admin account.');
+};
+
 const setAdminAuthStatus = (message, color = '') => {
   if (!adminAuthStatus) return;
   adminAuthStatus.textContent = message || '';
@@ -292,6 +313,12 @@ const setAdminAuthenticatedState = (session) => {
   adminAccessToken = session?.access_token || '';
 
   if (!adminRoot) return;
+
+  if (isPasswordRecoveryMode()) {
+    setAdminRecoveryState(session);
+    return;
+  }
+
   adminRoot.dataset.adminState = user ? 'signed-in' : 'signed-out';
 
   setElementVisible(adminSession, !!user, 'grid');
@@ -599,17 +626,12 @@ const initAdminAuth = async () => {
     });
 
     supabaseClient.auth.onAuthStateChange(async (eventName, session) => {
-      setAdminAuthenticatedState(session);
-
       if (eventName === 'PASSWORD_RECOVERY' || isPasswordRecoveryMode()) {
-        adminRoot.dataset.adminState = 'recovery';
-        setElementVisible(adminLoginForm, false);
-        setElementVisible(adminResetForm, false);
-        setElementVisible(adminPasswordForm, true, 'grid');
-        setElementVisible(adminLocked, false);
-        setAdminAuthStatus('Choose a new password for your admin account.');
+        setAdminRecoveryState(session);
         return;
       }
+
+      setAdminAuthenticatedState(session);
 
       if (session?.user) {
         setAdminAuthStatus('');
@@ -631,12 +653,7 @@ const initAdminAuth = async () => {
       setAdminAuthStatus('');
       await refreshAdminListsWithRetry();
     } else if (isPasswordRecoveryMode()) {
-      adminRoot.dataset.adminState = 'recovery';
-      setElementVisible(adminLoginForm, false);
-      setElementVisible(adminResetForm, false);
-      setElementVisible(adminPasswordForm, true, 'grid');
-      setElementVisible(adminLocked, false);
-      setAdminAuthStatus('Choose a new password for your admin account.');
+      setAdminRecoveryState(session);
     } else {
       setAdminAuthStatus('Sign in to manage club updates.');
     }
