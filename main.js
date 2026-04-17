@@ -274,11 +274,16 @@ const setElementVisible = (element, visible, displayValue = '') => {
 };
 
 const getAdminRedirectUrl = () => new URL('/admin.html', window.location.origin).toString();
+const initialAdminUrl = window.location.href;
+const initialRecoveryMode =
+  initialAdminUrl.includes('type=recovery') ||
+  initialAdminUrl.includes('/auth/v1/verify') ||
+  initialAdminUrl.includes('access_token=');
 
 const isPasswordRecoveryMode = () => {
   const hash = new URLSearchParams(window.location.hash.replace(/^#/, ''));
   const search = new URLSearchParams(window.location.search);
-  return hash.get('type') === 'recovery' || search.get('type') === 'recovery';
+  return initialRecoveryMode || hash.get('type') === 'recovery' || search.get('type') === 'recovery';
 };
 
 const setAdminRecoveryState = (session = null) => {
@@ -649,11 +654,11 @@ const initAdminAuth = async () => {
 
     setAdminAuthenticatedState(session);
 
-    if (session?.user) {
+    if (isPasswordRecoveryMode()) {
+      setAdminRecoveryState(session);
+    } else if (session?.user) {
       setAdminAuthStatus('');
       await refreshAdminListsWithRetry();
-    } else if (isPasswordRecoveryMode()) {
-      setAdminRecoveryState(session);
     } else {
       setAdminAuthStatus('Sign in to manage club updates.');
     }
